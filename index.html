@@ -64,8 +64,6 @@
             <select id="marineArea">
               <option value="MA 9 (Admiralty Inlet)">MA 9</option>
               <option value="MA 10 (Seattle/Bremerton)">MA 10</option>
-              <option value="MA 8-1 / 8-2">MA 8-1 / 8-2</option>
-              <option value="Other">Other</option>
             </select>
           </div>
           <div class="form-group">
@@ -413,7 +411,7 @@
           if (clean.length >= 5) {
             logs.push({
               timestamp: clean[0] || new Date().toISOString().slice(0, 16),
-              marineArea: clean[1] || 'Other',
+              marineArea: clean[1] || 'MA 9 (Admiralty Inlet)',
               species: clean[2] || 'Chinook (King)',
               lure: clean[3] || 'Unknown Lure',
               depth: clean[4] || '0',
@@ -447,7 +445,7 @@
         
         const entry = {
           timestamp: new Date().toISOString().slice(0, 16),
-          marineArea: 'Other',
+          marineArea: 'MA 9 (Admiralty Inlet)',
           species: 'Chinook (King)',
           lure: 'Keep Import',
           depth: '0',
@@ -460,6 +458,7 @@
         };
 
         const lower = line.toLowerCase();
+        if (lower.includes('ma 10') || lower.includes('area 10')) entry.marineArea = 'MA 10 (Seattle/Bremerton)';
         if (lower.includes('coho') || lower.includes('silver')) entry.species = 'Coho (Silver)';
         if (lower.includes('pink')) entry.species = 'Pink';
         if (lower.includes('chum')) entry.species = 'Chum';
