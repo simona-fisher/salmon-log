@@ -118,18 +118,23 @@
           </div>
         </div>
 
+        <div class="form-group">
+          <label>Outcome</label>
+          <select id="outcome">
+            <option value="Kept">Kept</option>
+            <option value="Released">Released</option>
+            <option value="Lost / Strike">Lost / Strike</option>
+          </select>
+        </div>
+
         <div class="grid">
           <div class="form-group">
-            <label>Outcome</label>
-            <select id="outcome">
-              <option value="Kept">Kept</option>
-              <option value="Released">Released</option>
-              <option value="Lost / Strike">Lost / Strike</option>
-            </select>
+            <label>Length (in)</label>
+            <input type="text" id="length" placeholder="e.g. 28 in">
           </div>
           <div class="form-group">
-            <label>Size / Weight</label>
-            <input type="text" id="size" placeholder="28 in / 11 lbs">
+            <label>Weight (lbs)</label>
+            <input type="text" id="weight" placeholder="e.g. 11 lbs">
           </div>
         </div>
 
@@ -586,7 +591,9 @@
           <div class="card-meta">🎣 <strong>Lure:</strong> ${item.lure}</div>
           <div class="card-meta">⚓ <strong>Depth:</strong> ${item.depth}ft | 🌊 <strong>FOW:</strong> ${item.fow}ft @ ${item.speed}kts</div>
           ${item.tide ? `<div class="card-meta">🌊 <strong>Tide:</strong> ${item.tide}</div>` : ''}
-          ${item.size ? `<div class="card-meta">📏 <strong>Size:</strong> ${item.size}</div>` : ''}
+          ${item.length ? `<div class="card-meta">📏 <strong>Length:</strong> ${item.length}</div>` : ''}
+          ${item.weight ? `<div class="card-meta">⚖️ <strong>Weight:</strong> ${item.weight}</div>` : ''}
+          ${(!item.length && !item.weight && item.size) ? `<div class="card-meta">📏 <strong>Size:</strong> ${item.size}</div>` : ''}
           ${item.notes ? `<div class="notes">"${item.notes}"</div>` : ''}
         </div>
       `).reverse().join('');
@@ -611,7 +618,8 @@
       document.getElementById('speed').value = item.speed || '';
       document.getElementById('weather').value = item.weather || 'Overcast';
       document.getElementById('outcome').value = item.outcome || 'Kept';
-      document.getElementById('size').value = item.size || '';
+      document.getElementById('length').value = item.length || '';
+      document.getElementById('weight').value = item.weight || '';
       document.getElementById('notes').value = item.notes || '';
 
       const submitBtn = document.querySelector('#catchForm .btn-submit');
@@ -656,7 +664,8 @@
         speed: document.getElementById('speed').value,
         weather: document.getElementById('weather').value,
         outcome: document.getElementById('outcome').value,
-        size: document.getElementById('size').value,
+        length: document.getElementById('length').value,
+        weight: document.getElementById('weight').value,
         notes: document.getElementById('notes').value
       };
 
@@ -692,7 +701,7 @@
       const logs = getLogs();
       if (!logs.length) return alert('No data to export.');
       
-      const headers = ['Timestamp', 'Marine Area', 'Species', 'Linked Lure', 'Downrigger Depth (ft)', 'FOW (ft)', 'Speed (kts)', 'Weather', 'Outcome', 'Size', 'Tide Stage', 'Notes'];
+      const headers = ['Timestamp', 'Marine Area', 'Species', 'Linked Lure', 'Downrigger Depth (ft)', 'FOW (ft)', 'Speed (kts)', 'Weather', 'Outcome', 'Length', 'Weight', 'Tide Stage', 'Notes'];
       const rows = logs.map(l => [
         l.timestamp,
         `"${l.marineArea}"`,
@@ -703,7 +712,8 @@
         l.speed,
         `"${l.weather}"`,
         `"${l.outcome}"`,
-        `"${l.size}"`,
+        `"${l.length || ''}"`,
+        `"${l.weight || ''}"`,
         `"${l.tide || ''}"`,
         `"${l.notes}"`
       ]);
@@ -743,9 +753,10 @@
               speed: clean[6] || '0',
               weather: clean[7] || 'Overcast',
               outcome: clean[8] || 'Kept',
-              size: clean[9] || '',
-              tide: clean[10] || '',
-              notes: clean[11] || ''
+              length: clean[9] || '',
+              weight: clean[10] || '',
+              tide: clean[11] || '',
+              notes: clean[12] || ''
             });
           }
         }
@@ -778,7 +789,8 @@
           speed: '2.4',
           weather: 'Overcast',
           outcome: 'Kept',
-          size: '',
+          length: '',
+          weight: '',
           tide: '',
           notes: line.trim()
         };
