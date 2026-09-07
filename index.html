@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Puget Sound Salmon Log</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <style>
+    :root { --primary: #1e3a8a; --accent: #2563eb; --bg: #f8fafc; --card: #ffffff; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); margin: 0; padding: 16px; color: #1e293b; }
+    .container { max-width: 500px; margin: 0 auto; background: var(--card); border-radius: 14px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    h1 { font-size: 1.4rem; color: var(--primary); text-align: center; margin-top: 0; }
+    .form-group { margin-bottom: 12px; }
+    label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; color: #475569; }
+    input, select, textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; box-sizing: border-box; background: #fff; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    button { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: 600; font-size: 1rem; cursor: pointer; }
+    .btn-submit { background: var(--accent); color: white; margin-top: 10px; }
+    .btn-export { background: #059669; color: white; margin-top: 8px; }
+    .log-list { margin-top: 24px; }
+    .log-card { background: #f1f5f9; border-left: 4px solid var(--accent); border-radius: 6px; padding: 12px; margin-bottom: 10px; font-size: 0.9rem; }
+    .log-title { font-weight: bold; display: flex; justify-content: space-between; color: var(--primary); }
+    .log-meta { margin-top: 4px; color: #334155; }
+    .notes { font-style: italic; color: #64748b; margin-top: 4px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1> Salmon Log</h1>
+    <form id="catchForm">
+      <div class="form-group">
+        <label>Date & Time</label>
+        <input type="datetime-local" id="timestamp" required>
+      </div>
+      
+      <div class="grid">
+        <div class="form-group">
+          <label>Marine Area</label>
+          <select id="marineArea">
+            <option value="MA 9 (Admiralty Inlet)">MA 9</option>
+            <option value="MA 10 (Seattle/Bremerton)">MA 10</option>
+            <option value="MA 8-1 / 8-2">MA 8-1 / 8-2</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Species</label>
+          <select id="species">
+            <option value="Chinook (King)">Chinook</option>
+            <option value="Coho (Silver)">Coho</option>
+            <option value="Pink">Pink</option>
+            <option value="Chum">Chum</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="form-group">
+          <label>Setup / Lure</label>
+          <input type="text" id="lure" placeholder="Flsh + Spoon" required>
+        </div>
+        <div class="form-group">
+          <label>Depth (ft)</label>
+          <input type="number" id="depth" placeholder="60">
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="form-group">
+          <label>Speed (kts)</label>
+          <input type="number" step="0.1" id="speed" placeholder="2.4">
+        </div>
+        <div class="form-group">
+          <label>Result</label>
+          <select id="outcome">
+            <option value="Kept">Kept</option>
+            <option value="Released">Released</option>
+            <option value="Lost">Lost / Strike</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Length / Weight</label>
+        <input type="text" id="size" placeholder="e.g. 28 in / 11 lbs">
+      </div>
+
+      <div class="form-group">
+        <label>Notes (Tide, Waypoint, Conditions)</label>
+        <textarea id="notes" rows="2" placeholder="Ebb tide, overcast..."></textarea>
+      </div>
+
+      <button type="submit" class="btn-submit">Save Entry</button>
+    </form>
+
+    <button type="button" class="btn-export" onclick="exportCSV()">Export CSV Backup</button>
+
+    <div class="log-list">
+      <h2>Recent Catches</h2>
+      <div id="logEntries"></div>
+    </div>
+  </div>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+
+    document.getElementById('timestamp').value = new Date().toISOString().slice(0, 16);
+
+    const form = document.getElementById('catchForm');
+    const logContainer = document.getElementById('logEntries');
+
+    function renderLogs() {
+      const logs = JSON.parse(localStorage.getItem('salmonLogs') || '[]');
+      logContainer.innerHTML = logs.map(item => `
+        <div class="log-card">
+          <div class="log-title">
+            <span>${item.species} (${item.outcome})</span>
+            <span>${new Date(item.timestamp).toLocaleDateString()}</span>
+          </div>
+          <div class="log-meta">
+            ${item.marineArea} | ${item.lure} | ${item.depth}ft @ ${item.speed}kts
+          </div>
+          ${item.size ? `<div class="log-meta"><strong>Size:</strong> ${item.size}</div>` : ''}
+          ${item.notes ? `<div class="notes">"${item.notes}"</div>` : ''}
+        </div>
+      `).reverse().join('');
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const entry = {
+        timestamp: document.getElementById('timestamp').value,
+        marineArea: document.getElementById('marineArea').value,
+        species: document.getElementById('species').value,
+        lure: document.getElementById('lure').value,
+        depth: document.getElementById('depth').value,
+        speed: document.getElementById('speed').value,
+        outcome: document.getElementById('outcome').value,
+        size: document.getElementById('size').value,
+        notes: document.getElementById('notes').value
+      };
+
+      const logs = JSON.parse(localStorage.getItem('salmonLogs') || '[]');
+      logs.push(entry);
+      localStorage.setItem('salmonLogs', JSON.stringify(logs));
+      form.reset();
+      document.getElementById('timestamp').value = new Date().toISOString().slice(0, 16);
+      renderLogs();
+    });
+
+    function exportCSV() {
+      const logs = JSON.parse(localStorage.getItem('salmonLogs') || '[]');
+      if (!logs.length) return alert('No data to export.');
+      
+      const headers = ['Timestamp', 'Marine Area', 'Species', 'Lure', 'Depth (ft)', 'Speed (kts)', 'Outcome', 'Size', 'Notes'];
+      const rows = logs.map(l => [l.timestamp, l.marineArea, l.species, `"${l.lure}"`, l.depth, l.speed, l.outcome, `"${l.size}"`, `"${l.notes}"`]);
+      const csv = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+      
+      const link = document.createElement('a');
+      link.href = encodeURI(csv);
+      link.download = `salmon_log_${new Date().toISOString().slice(0,10)}.csv`;
+      link.click();
+    }
+
+    renderLogs();
+  </script>
+</body>
+</html>
