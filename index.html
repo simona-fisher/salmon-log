@@ -357,43 +357,35 @@ function renderReports() {
         else timeBuckets['Night (9pm-5am)']++;
       });
 
-      // 3. Top Wire Success (Downrigger Depth Brackets)
-      const wireBuckets = {
-        'Shallow (< 40 ft)': 0,
-        '40 - 70 ft': 0,
-        '71 - 100 ft': 0,
-        '101 - 130 ft': 0,
-        'Deep (131+ ft)': 0
+      // Helper function to calculate 5 ft increment brackets
+      const get5ftLabel = (val) => {
+        const start = Math.floor(val / 5) * 5;
+        return `${start} - ${start + 4} ft`;
       };
 
+      // 3. Top Wire Success (5 ft Increments)
+      const wireCounts = {};
       logs.forEach(l => {
         if (!l.depth) return;
         const d = parseFloat(l.depth);
-        if (d < 40) wireBuckets['Shallow (< 40 ft)']++;
-        else if (d <= 70) wireBuckets['40 - 70 ft']++;
-        else if (d <= 100) wireBuckets['71 - 100 ft']++;
-        else if (d <= 130) wireBuckets['101 - 130 ft']++;
-        else wireBuckets['Deep (131+ ft)']++;
+        if (!isNaN(d)) {
+          const label = get5ftLabel(d);
+          wireCounts[label] = (wireCounts[label] || 0) + 1;
+        }
       });
+      const sortedWire = Object.entries(wireCounts).sort((a, b) => b[1] - a[1]);
 
-      // 4. Top FOW Success (Water Depth Brackets)
-      const fowBuckets = {
-        'Shallow (< 60 ft)': 0,
-        '60 - 100 ft': 0,
-        '101 - 150 ft': 0,
-        '151 - 200 ft': 0,
-        'Deep (200+ ft)': 0
-      };
-
+      // 4. Top FOW Success (5 ft Increments)
+      const fowCounts = {};
       logs.forEach(l => {
         if (!l.fow) return;
         const f = parseFloat(l.fow);
-        if (f < 60) fowBuckets['Shallow (< 60 ft)']++;
-        else if (f <= 100) fowBuckets['60 - 100 ft']++;
-        else if (f <= 150) fowBuckets['101 - 150 ft']++;
-        else if (f <= 200) fowBuckets['151 - 200 ft']++;
-        else fowBuckets['Deep (200+ ft)']++;
+        if (!isNaN(f)) {
+          const label = get5ftLabel(f);
+          fowCounts[label] = (fowCounts[label] || 0) + 1;
+        }
       });
+      const sortedFow = Object.entries(fowCounts).sort((a, b) => b[1] - a[1]);
 
       // HTML Render Helpers
       const renderBar = (label, count) => {
@@ -428,41 +420,20 @@ function renderReports() {
         </div>
 
         <div class="item-card" style="border-left-color:#0284c7;">
-          <h3 style="margin-top:0; color:#1e3a8a; font-size:0.95rem;">⚓ Top Wire Success (Downrigger Depth)</h3>
-          ${Object.entries(wireBuckets).map(([bucket, cnt]) => renderBar(bucket, cnt)).join('')}
+          <h3 style="margin-top:0; color:#1e3a8a; font-size:0.95rem;">⚓ Top Wire Success (5 ft Increments)</h3>
+          ${sortedWire.length > 0 
+            ? sortedWire.slice(0, 5).map(([bracket, cnt]) => renderBar(bracket, cnt)).join('')
+            : '<p style="font-size:0.82rem; color:#64748b; margin:0;">No depth data logged yet.</p>'}
         </div>
 
         <div class="item-card" style="border-left-color:#a855f7;">
-          <h3 style="margin-top:0; color:#1e3a8a; font-size:0.95rem;">🌊 Top FOW Success (Water Depth)</h3>
-          ${Object.entries(fowBuckets).map(([bucket, cnt]) => renderBar(bucket, cnt)).join('')}
+          <h3 style="margin-top:0; color:#1e3a8a; font-size:0.95rem;">🌊 Top FOW Success (5 ft Increments)</h3>
+          ${sortedFow.length > 0 
+            ? sortedFow.slice(0, 5).map(([bracket, cnt]) => renderBar(bracket, cnt)).join('')
+            : '<p style="font-size:0.82rem; color:#64748b; margin:0;">No FOW data logged yet.</p>'}
         </div>
       `;
     }
-    
-    document.getElementById('catchForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const entry = {
-        timestamp: document.getElementById('timestamp').value,
-        marineArea: document.getElementById('marineArea').value,
-        species: document.getElementById('species').value,
-        lure: document.getElementById('lureSelect').value,
-        depth: document.getElementById('depth').value,
-        fow: document.getElementById('fow').value,
-        speed: document.getElementById('speed').value,
-        weather: document.getElementById('weather').value,
-        outcome: document.getElementById('outcome').value,
-        size: document.getElementById('size').value,
-        notes: document.getElementById('notes').value
-      };
-
-      const logs = JSON.parse(localStorage.getItem('salmonLogs') || '[]');
-      logs.push(entry);
-      localStorage.setItem('salmonLogs', JSON.stringify(logs));
-      document.getElementById('catchForm').reset();
-      document.getElementById('timestamp').value = new Date().toISOString().slice(0, 16);
-      renderLogs();
-      switchTab('historyTab');
-    });
 
     function exportCSV() {
       const logs = JSON.parse(localStorage.getItem('salmonLogs') || '[]');
