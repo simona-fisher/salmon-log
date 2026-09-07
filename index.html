@@ -74,7 +74,6 @@
               <option value="Chinook - Hatchery">Chinook - Hatchery</option>
               <option value="Chinook - Wild">Chinook - Wild</option>
               <option value="Pink">Pink</option>
-              <option value="Chum">Chum</option>
             </select>
           </div>
         </div>
@@ -474,7 +473,6 @@
           entry.species = lower.includes('wild') ? 'Chinook - Wild' : 'Chinook - Hatchery';
         }
         if (lower.includes('pink')) entry.species = 'Pink';
-        if (lower.includes('chum')) entry.species = 'Chum';
 
         if (lower.includes('released')) entry.outcome = 'Released';
         if (lower.includes('lost') || lower.includes('strike')) entry.outcome = 'Lost / Strike';
