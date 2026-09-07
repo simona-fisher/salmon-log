@@ -130,8 +130,8 @@
         </div>
 
         <div class="form-group">
-          <label>Notes (Tide stage, GPS waypoint, etc.)</label>
-          <textarea id="notes" rows="2" placeholder="High slack tide, near oil docks..."></textarea>
+          <label>Notes (GPS waypoint, conditions, etc.)</label>
+          <textarea id="notes" rows="2" placeholder="Near Apple Tree Cove, active birds..."></textarea>
         </div>
 
         <button type="submit" class="btn-submit">💾 Save Catch Entry</button>
@@ -211,6 +211,83 @@
       const now = new Date();
       now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
       document.getElementById('timestamp').value = now.toISOString().slice(0, 16);
+    }
+
+    // NOAA Kingston (Appletree Cove) Station 9445639 Tide Stage Lookup
+    async function getTideStage(timestampStr) {
+      try {
+        const entryDate = new Date(timestampStr);
+        if (isNaN(entryDate.getTime())) return 'Unknown Date';
+
+        const prevDate = new Date(entryDate.getTime() - 86400000);
+        const nextDate = new Date(entryDate.getTime() + 86400000);
+
+        const formatDate = (dateObj) => {
+          const y = dateObj.getFullYear();
+          const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+          const d = String(dateObj.getDate()).padStart(2, '0');
+          return `${y}${m}${d}`;
+        };
+
+        const bdate = formatDate(prevDate);
+        const edate = formatDate(nextDate);
+
+        const url = `https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?begin_date=${bdate}&end_date=${edate}&station=9445639&product=predictions&datum=MLLW&time_zone=lst_ldt&interval=hilo&units=english&application=SalmonLog&format=json`;
+
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (!data.predictions || data.predictions.length === 0) {
+          return 'Tide data unavailable';
+        }
+
+        const preds = data.predictions.map(p => {
+          const parts = p.t.split(' ');
+          const dateParts = parts[0].split('-');
+          const timeParts = parts[1].split(':');
+          const pDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2], timeParts[0], timeParts[1]);
+          return { time: pDate, type: p.type, height: p.v };
+        });
+
+        let prevTide = null;
+        let nextTide = null;
+
+        for (let i = 0; i < preds.length; i++) {
+          if (preds[i].time <= entryDate) {
+            prevTide = preds[i];
+          } else if (preds[i].time > entryDate && !nextTide) {
+            nextTide = preds[i];
+            break;
+          }
+        }
+
+        if (!prevTide || !nextTide) return 'Tide out of range';
+
+        const diffPrevMins = Math.round((entryDate - prevTide.time) / 60000);
+        const diffNextMins = Math.round((nextTide.time - entryDate) / 60000);
+
+        if (diffPrevMins <= 35) {
+          return `Slack (${prevTide.type === 'H' ? 'High' : 'Low'}) - ${prevTide.height}ft`;
+        }
+        if (diffNextMins <= 35) {
+          return `Slack (${nextTide.type === 'H' ? 'High' : 'Low'}) - ${nextTide.height}ft`;
+        }
+
+        let stage = '';
+        if (prevTide.type === 'H' && nextTide.type === 'L') {
+          stage = 'Ebb (Falling)';
+        } else if (prevTide.type === 'L' && nextTide.type === 'H') {
+          stage = 'Flood (Rising)';
+        } else {
+          stage = prevTide.type === 'H' ? 'Ebb' : 'Flood';
+        }
+
+        const hrs = (diffPrevMins / 60).toFixed(1);
+        return `${stage} (${hrs}h after ${prevTide.type === 'H' ? 'High' : 'Low'} ${prevTide.height}ft)`;
+
+      } catch (err) {
+        return 'Tide unavailable (Offline)';
+      }
     }
 
     const defaultLures = [
@@ -339,15 +416,18 @@
           <div class="card-meta">
             ⚓ <strong>Depth:</strong> ${item.depth}ft | 🌊 <strong>FOW:</strong> ${item.fow}ft @ ${item.speed}kts
           </div>
+          ${item.tide ? `<div class="card-meta">🌊 <strong>Tide:</strong> ${item.tide}</div>` : ''}
           ${item.size ? `<div class="card-meta">📏 <strong>Size:</strong> ${item.size}</div>` : ''}
           ${item.notes ? `<div class="notes">"${item.notes}"</div>` : ''}
         </div>
       `).reverse().join('');
     }
 
-    document.getElementById('catchForm').addEventListener('submit', (e) => {
+    document.getElementById('catchForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+      const entryId = Date.now().toString();
       const entry = {
+        id: entryId,
         timestamp: document.getElementById('timestamp').value,
         marineArea: document.getElementById('marineArea').value,
         species: document.getElementById('species').value,
@@ -358,23 +438,36 @@
         weather: document.getElementById('weather').value,
         outcome: document.getElementById('outcome').value,
         size: document.getElementById('size').value,
-        notes: document.getElementById('notes').value
+        notes: document.getElementById('notes').value,
+        tide: 'Calculating tide...'
       };
 
       const logs = JSON.parse(localStorage.getItem('salmonLogs') || '[]');
       logs.push(entry);
       localStorage.setItem('salmonLogs', JSON.stringify(logs));
+      
       document.getElementById('catchForm').reset();
       setLocalTimestamp();
       renderLogs();
       switchTab('historyTab');
+
+      // Asynchronously calculate tide after saving entry
+      const calculatedTide = await getTideStage(entry.timestamp);
+      
+      const currentLogs = JSON.parse(localStorage.getItem('salmonLogs') || '[]');
+      const matchIndex = currentLogs.findIndex(l => l.id === entryId || (l.timestamp === entry.timestamp && l.notes === entry.notes));
+      if (matchIndex !== -1) {
+        currentLogs[matchIndex].tide = calculatedTide;
+        localStorage.setItem('salmonLogs', JSON.stringify(currentLogs));
+        renderLogs();
+      }
     });
 
     function exportCSV() {
       const logs = JSON.parse(localStorage.getItem('salmonLogs') || '[]');
       if (!logs.length) return alert('No data to export.');
       
-      const headers = ['Timestamp', 'Marine Area', 'Species', 'Linked Lure', 'Downrigger Depth (ft)', 'FOW (ft)', 'Speed (kts)', 'Weather', 'Outcome', 'Size', 'Notes'];
+      const headers = ['Timestamp', 'Marine Area', 'Species', 'Linked Lure', 'Downrigger Depth (ft)', 'FOW (ft)', 'Speed (kts)', 'Weather', 'Outcome', 'Size', 'Tide Stage', 'Notes'];
       const rows = logs.map(l => [
         l.timestamp,
         `"${l.marineArea}"`,
@@ -386,6 +479,7 @@
         `"${l.weather}"`,
         `"${l.outcome}"`,
         `"${l.size}"`,
+        `"${l.tide || ''}"`,
         `"${l.notes}"`
       ]);
       const csv = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
@@ -416,6 +510,7 @@
 
           if (clean.length >= 5) {
             logs.push({
+              id: Date.now().toString() + Math.random(),
               timestamp: clean[0] || new Date().toISOString().slice(0, 16),
               marineArea: clean[1] || 'MA 10 (Seattle/Bremerton)',
               species: clean[2] || 'Coho - Hatchery',
@@ -426,7 +521,8 @@
               weather: clean[7] || 'Overcast',
               outcome: clean[8] || 'Kept',
               size: clean[9] || '',
-              notes: clean[10] || ''
+              tide: clean[10] || '',
+              notes: clean[11] || ''
             });
           }
         }
@@ -450,6 +546,7 @@
         if (!line.trim()) return;
         
         const entry = {
+          id: Date.now().toString() + Math.random(),
           timestamp: new Date().toISOString().slice(0, 16),
           marineArea: 'MA 10 (Seattle/Bremerton)',
           species: 'Coho - Hatchery',
@@ -460,6 +557,7 @@
           weather: 'Overcast',
           outcome: 'Kept',
           size: '',
+          tide: '',
           notes: line.trim()
         };
 
