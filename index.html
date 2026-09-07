@@ -69,8 +69,10 @@
           <div class="form-group">
             <label>Species</label>
             <select id="species">
-              <option value="Chinook (King)">Chinook</option>
-              <option value="Coho (Silver)">Coho</option>
+              <option value="Coho - Hatchery" selected>Coho - Hatchery</option>
+              <option value="Coho - Wild">Coho - Wild</option>
+              <option value="Chinook - Hatchery">Chinook - Hatchery</option>
+              <option value="Chinook - Wild">Chinook - Wild</option>
               <option value="Pink">Pink</option>
               <option value="Chum">Chum</option>
             </select>
@@ -188,7 +190,7 @@
 
           <div class="form-group" style="margin-top: 12px;">
             <label>Option B: Paste Raw Keep Text Notes</label>
-            <textarea id="keepTextPaste" rows="3" placeholder="Paste notes here (e.g. 'Coho 60ft wire 110 FOW Kingfisher Spatterback')"></textarea>
+            <textarea id="keepTextPaste" rows="3" placeholder="Paste notes here (e.g. 'Coho wild 60ft wire 110 FOW Kingfisher Spatterback')"></textarea>
             <button type="button" class="btn-submit" style="background: #d97706; margin-top: 6px;" onclick="importKeepText()">Parse & Import Keep Text</button>
           </div>
         </div>
@@ -206,14 +208,12 @@
       navigator.serviceWorker.register('sw.js').catch(() => {});
     }
 
-    // Sets default date/time field to user's local timezone
     function setLocalTimestamp() {
       const now = new Date();
       now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
       document.getElementById('timestamp').value = now.toISOString().slice(0, 16);
     }
 
-    // Default Seed Lures if Database is Empty
     const defaultLures = [
       { id: '1', name: 'Kingfisher 3.5', type: 'Spoon', color: 'Spatterback UV' },
       { id: '2', name: 'Coho Killer', type: 'Flasher + Spoon', color: 'Cookies & Cream' },
@@ -419,7 +419,7 @@
             logs.push({
               timestamp: clean[0] || new Date().toISOString().slice(0, 16),
               marineArea: clean[1] || 'MA 9 (Admiralty Inlet)',
-              species: clean[2] || 'Chinook (King)',
+              species: clean[2] || 'Coho - Hatchery',
               lure: clean[3] || 'Unknown Lure',
               depth: clean[4] || '0',
               fow: clean[5] || '0',
@@ -453,7 +453,7 @@
         const entry = {
           timestamp: new Date().toISOString().slice(0, 16),
           marineArea: 'MA 9 (Admiralty Inlet)',
-          species: 'Chinook (King)',
+          species: 'Coho - Hatchery',
           lure: 'Keep Import',
           depth: '0',
           fow: '0',
@@ -466,9 +466,16 @@
 
         const lower = line.toLowerCase();
         if (lower.includes('ma 10') || lower.includes('area 10')) entry.marineArea = 'MA 10 (Seattle/Bremerton)';
-        if (lower.includes('coho') || lower.includes('silver')) entry.species = 'Coho (Silver)';
+        
+        if (lower.includes('coho') || lower.includes('silver')) {
+          entry.species = lower.includes('wild') ? 'Coho - Wild' : 'Coho - Hatchery';
+        }
+        if (lower.includes('chinook') || lower.includes('king')) {
+          entry.species = lower.includes('wild') ? 'Chinook - Wild' : 'Chinook - Hatchery';
+        }
         if (lower.includes('pink')) entry.species = 'Pink';
         if (lower.includes('chum')) entry.species = 'Chum';
+
         if (lower.includes('released')) entry.outcome = 'Released';
         if (lower.includes('lost') || lower.includes('strike')) entry.outcome = 'Lost / Strike';
 
