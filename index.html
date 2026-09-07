@@ -62,8 +62,8 @@
           <div class="form-group">
             <label>Marine Area</label>
             <select id="marineArea">
+              <option value="MA 10 (Seattle/Bremerton)" selected>MA 10</option>
               <option value="MA 9 (Admiralty Inlet)">MA 9</option>
-              <option value="MA 10 (Seattle/Bremerton)">MA 10</option>
             </select>
           </div>
           <div class="form-group">
@@ -418,7 +418,7 @@
           if (clean.length >= 5) {
             logs.push({
               timestamp: clean[0] || new Date().toISOString().slice(0, 16),
-              marineArea: clean[1] || 'MA 9 (Admiralty Inlet)',
+              marineArea: clean[1] || 'MA 10 (Seattle/Bremerton)',
               species: clean[2] || 'Coho - Hatchery',
               lure: clean[3] || 'Unknown Lure',
               depth: clean[4] || '0',
@@ -452,7 +452,7 @@
         
         const entry = {
           timestamp: new Date().toISOString().slice(0, 16),
-          marineArea: 'MA 9 (Admiralty Inlet)',
+          marineArea: 'MA 10 (Seattle/Bremerton)',
           species: 'Coho - Hatchery',
           lure: 'Keep Import',
           depth: '0',
@@ -465,7 +465,7 @@
         };
 
         const lower = line.toLowerCase();
-        if (lower.includes('ma 10') || lower.includes('area 10')) entry.marineArea = 'MA 10 (Seattle/Bremerton)';
+        if (lower.includes('ma 9') || lower.includes('area 9')) entry.marineArea = 'MA 9 (Admiralty Inlet)';
         
         if (lower.includes('coho') || lower.includes('silver')) {
           entry.species = lower.includes('wild') ? 'Coho - Wild' : 'Coho - Hatchery';
