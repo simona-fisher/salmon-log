@@ -139,6 +139,7 @@
         </div>
 
         <button type="submit" class="btn-submit">💾 Save Catch Entry</button>
+        <button type="button" id="cancelEditBtn" class="btn-danger" style="display:none; width:100%; margin-top:6px;" onclick="resetCatchForm()">Cancel Editing</button>
       </form>
     </div>
 
@@ -254,6 +255,8 @@
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').catch(() => {});
     }
+
+    let editingEntryId = null;
 
     function setLocalTimestamp() {
       const now = new Date();
@@ -415,7 +418,7 @@
         const exists = currentLures.some(l => l.name === modelName && l.color === colorPattern);
         if (!exists) {
           currentLures.push({
-            id: Date.now().toString() + Math.random(),
+            id: Date.now().toString() + Math.random().toString(36).substring(2, 6),
             name: modelName,
             type: category,
             color: colorPattern
@@ -547,8 +550,21 @@
       alert(`Moved "${item.name}" into your active Lure Locker!`);
     }
 
+    function getLogs() {
+      let logs = JSON.parse(localStorage.getItem('salmonLogs') || '[]');
+      let updated = false;
+      logs.forEach(l => {
+        if (!l.id) {
+          l.id = Date.now().toString() + Math.random().toString(36).substring(2, 6);
+          updated = true;
+        }
+      });
+      if (updated) localStorage.setItem('salmonLogs', JSON.stringify(logs));
+      return logs;
+    }
+
     function renderLogs() {
-      const logs = JSON.parse(localStorage.getItem('salmonLogs') || '[]');
+      const logs = getLogs();
       const container = document.getElementById('logEntries');
       if (logs.length === 0) {
         container.innerHTML = '<p style="text-align:center; color:#64748b;">No catches recorded yet.</p>';
@@ -558,7 +574,13 @@
         <div class="item-card">
           <div class="card-title">
             <span>${item.species} (${item.outcome})</span>
-            <span style="font-size:0.75rem; color:#64748b;">${new Date(item.timestamp).toLocaleDateString()} ${new Date(item.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+            <div style="display:flex; gap:4px; align-items:center;">
+              <button class="btn-action" onclick="editLog('${item.id}')">Edit</button>
+              <button class="btn-danger" onclick="deleteLog('${item.id}')">Delete</button>
+            </div>
+          </div>
+          <div class="card-meta" style="font-size:0.78rem; color:#64748b; margin-bottom:4px;">
+            🕒 ${new Date(item.timestamp).toLocaleDateString()} ${new Date(item.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
           </div>
           <div class="card-meta">📍 <strong>${item.marineArea}</strong> | ☁️ ${item.weather}</div>
           <div class="card-meta">🎣 <strong>Lure:</strong> ${item.lure}</div>
@@ -570,11 +592,61 @@
       `).reverse().join('');
     }
 
+    function editLog(id) {
+      const logs = getLogs();
+      const item = logs.find(l => l.id === id);
+      if (!item) return;
+
+      editingEntryId = id;
+
+      document.getElementById('timestamp').value = item.timestamp || '';
+      document.getElementById('marineArea').value = item.marineArea || 'MA 10 (Seattle/Bremerton)';
+      document.getElementById('species').value = item.species || 'Coho - Hatchery';
+      
+      const lureSelect = document.getElementById('lureSelect');
+      if (item.lure) lureSelect.value = item.lure;
+
+      document.getElementById('depth').value = item.depth || '';
+      document.getElementById('fow').value = item.fow || '';
+      document.getElementById('speed').value = item.speed || '';
+      document.getElementById('weather').value = item.weather || 'Overcast';
+      document.getElementById('outcome').value = item.outcome || 'Kept';
+      document.getElementById('size').value = item.size || '';
+      document.getElementById('notes').value = item.notes || '';
+
+      const submitBtn = document.querySelector('#catchForm .btn-submit');
+      submitBtn.textContent = '✏️ Update Catch Entry';
+      submitBtn.style.background = '#d97706';
+
+      document.getElementById('cancelEditBtn').style.display = 'block';
+
+      switchTab('logTab');
+    }
+
+    function resetCatchForm() {
+      editingEntryId = null;
+      document.getElementById('catchForm').reset();
+      setLocalTimestamp();
+      
+      const submitBtn = document.querySelector('#catchForm .btn-submit');
+      submitBtn.textContent = '💾 Save Catch Entry';
+      submitBtn.style.background = 'var(--accent)';
+      
+      document.getElementById('cancelEditBtn').style.display = 'none';
+    }
+
+    function deleteLog(id) {
+      if (!confirm('Are you sure you want to delete this catch entry?')) return;
+      let logs = getLogs().filter(l => l.id !== id);
+      localStorage.setItem('salmonLogs', JSON.stringify(logs));
+      renderLogs();
+    }
+
     document.getElementById('catchForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const entryId = Date.now().toString();
-      const entry = {
-        id: entryId,
+      const logs = getLogs();
+
+      const entryData = {
         timestamp: document.getElementById('timestamp').value,
         marineArea: document.getElementById('marineArea').value,
         species: document.getElementById('species').value,
@@ -585,22 +657,30 @@
         weather: document.getElementById('weather').value,
         outcome: document.getElementById('outcome').value,
         size: document.getElementById('size').value,
-        notes: document.getElementById('notes').value,
-        tide: 'Calculating tide...'
+        notes: document.getElementById('notes').value
       };
 
-      const logs = JSON.parse(localStorage.getItem('salmonLogs') || '[]');
-      logs.push(entry);
+      let entryId;
+
+      if (editingEntryId) {
+        entryId = editingEntryId;
+        const index = logs.findIndex(l => l.id === entryId);
+        if (index !== -1) {
+          logs[index] = { ...logs[index], ...entryData, tide: 'Calculating tide...' };
+        }
+      } else {
+        entryId = Date.now().toString();
+        logs.push({ id: entryId, ...entryData, tide: 'Calculating tide...' });
+      }
+
       localStorage.setItem('salmonLogs', JSON.stringify(logs));
-      
-      document.getElementById('catchForm').reset();
-      setLocalTimestamp();
+      resetCatchForm();
       renderLogs();
       switchTab('historyTab');
 
-      const calculatedTide = await getTideStage(entry.timestamp);
-      const currentLogs = JSON.parse(localStorage.getItem('salmonLogs') || '[]');
-      const matchIndex = currentLogs.findIndex(l => l.id === entryId || (l.timestamp === entry.timestamp && l.notes === entry.notes));
+      const calculatedTide = await getTideStage(entryData.timestamp);
+      const currentLogs = getLogs();
+      const matchIndex = currentLogs.findIndex(l => l.id === entryId);
       if (matchIndex !== -1) {
         currentLogs[matchIndex].tide = calculatedTide;
         localStorage.setItem('salmonLogs', JSON.stringify(currentLogs));
@@ -609,7 +689,7 @@
     });
 
     function exportCSV() {
-      const logs = JSON.parse(localStorage.getItem('salmonLogs') || '[]');
+      const logs = getLogs();
       if (!logs.length) return alert('No data to export.');
       
       const headers = ['Timestamp', 'Marine Area', 'Species', 'Linked Lure', 'Downrigger Depth (ft)', 'FOW (ft)', 'Speed (kts)', 'Weather', 'Outcome', 'Size', 'Tide Stage', 'Notes'];
@@ -643,7 +723,7 @@
       reader.onload = function(e) {
         const text = e.target.result;
         const lines = text.split('\n');
-        const logs = JSON.parse(localStorage.getItem('salmonLogs') || '[]');
+        const logs = getLogs();
         let startIndex = lines[0].toLowerCase().includes('timestamp') ? 1 : 0;
 
         for (let i = startIndex; i < lines.length; i++) {
@@ -653,7 +733,7 @@
 
           if (clean.length >= 5) {
             logs.push({
-              id: Date.now().toString() + Math.random(),
+              id: Date.now().toString() + Math.random().toString(36).substring(2, 6),
               timestamp: clean[0] || new Date().toISOString().slice(0, 16),
               marineArea: clean[1] || 'MA 10 (Seattle/Bremerton)',
               species: clean[2] || 'Coho - Hatchery',
@@ -682,13 +762,13 @@
       if (!rawText) return alert('Please paste some text notes first.');
 
       const lines = rawText.split('\n');
-      const logs = JSON.parse(localStorage.getItem('salmonLogs') || '[]');
+      const logs = getLogs();
       let count = 0;
 
       lines.forEach(line => {
         if (!line.trim()) return;
         const entry = {
-          id: Date.now().toString() + Math.random(),
+          id: Date.now().toString() + Math.random().toString(36).substring(2, 6),
           timestamp: new Date().toISOString().slice(0, 16),
           marineArea: 'MA 10 (Seattle/Bremerton)',
           species: 'Coho - Hatchery',
@@ -727,7 +807,7 @@
     }
 
     function renderReports() {
-      const logs = JSON.parse(localStorage.getItem('salmonLogs') || '[]');
+      const logs = getLogs();
       const container = document.getElementById('reportsContainer');
 
       if (logs.length === 0) {
