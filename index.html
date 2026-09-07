@@ -206,6 +206,13 @@
       navigator.serviceWorker.register('sw.js').catch(() => {});
     }
 
+    // Sets default date/time field to user's local timezone
+    function setLocalTimestamp() {
+      const now = new Date();
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      document.getElementById('timestamp').value = now.toISOString().slice(0, 16);
+    }
+
     // Default Seed Lures if Database is Empty
     const defaultLures = [
       { id: '1', name: 'Kingfisher 3.5', type: 'Spoon', color: 'Spatterback UV' },
@@ -322,7 +329,7 @@
         <div class="item-card">
           <div class="card-title">
             <span>${item.species} (${item.outcome})</span>
-            <span style="font-size:0.75rem; color:#64748b;">${new Date(item.timestamp).toLocaleDateString()}</span>
+            <span style="font-size:0.75rem; color:#64748b;">${new Date(item.timestamp).toLocaleDateString()} ${new Date(item.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
           </div>
           <div class="card-meta">
             📍 <strong>${item.marineArea}</strong> | ☁️ ${item.weather}
@@ -359,7 +366,7 @@
       logs.push(entry);
       localStorage.setItem('salmonLogs', JSON.stringify(logs));
       document.getElementById('catchForm').reset();
-      document.getElementById('timestamp').value = new Date().toISOString().slice(0, 16);
+      setLocalTimestamp();
       renderLogs();
       switchTab('historyTab');
     });
@@ -593,7 +600,7 @@
     }
 
     // Initial Load
-    document.getElementById('timestamp').value = new Date().toISOString().slice(0, 16);
+    setLocalTimestamp();
     renderLures();
     renderLogs();
   </script>
