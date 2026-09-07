@@ -14,8 +14,8 @@
     h1 { font-size: 1.3rem; color: var(--primary); text-align: center; margin-top: 0; margin-bottom: 12px; }
     
     /* Navigation Tabs */
-    .tabs { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
-    .tab-btn { flex: 1; padding: 8px 2px; font-size: 0.78rem; font-weight: 600; border: none; background: #e2e8f0; color: #475569; border-radius: 6px; cursor: pointer; text-align: center; }
+    .tabs { display: flex; gap: 3px; margin-bottom: 16px; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
+    .tab-btn { flex: 1; padding: 7px 1px; font-size: 0.72rem; font-weight: 600; border: none; background: #e2e8f0; color: #475569; border-radius: 6px; cursor: pointer; text-align: center; }
     .tab-btn.active { background: var(--primary); color: white; }
 
     .tab-content { display: none; }
@@ -30,6 +30,7 @@
     .btn-submit { background: var(--accent); color: white; margin-top: 8px; }
     .btn-export { background: #059669; color: white; margin-top: 12px; }
     .btn-danger { background: #ef4444; color: white; padding: 4px 8px; font-size: 0.75rem; border-radius: 4px; width: auto; }
+    .btn-action { background: #0284c7; color: white; padding: 5px 8px; font-size: 0.75rem; border-radius: 4px; width: auto; }
 
     /* Cards */
     .item-card { background: #f1f5f9; border-left: 4px solid var(--accent); border-radius: 6px; padding: 10px 12px; margin-bottom: 10px; font-size: 0.88rem; }
@@ -37,6 +38,9 @@
     .card-meta { margin-top: 4px; color: #334155; }
     .notes { font-style: italic; color: #64748b; margin-top: 4px; font-size: 0.82rem; }
     .badge { background: #dbeafe; color: #1e40af; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+    
+    /* Wishlist Photo Styling */
+    .wishlist-img { width: 100%; max-height: 180px; object-fit: cover; border-radius: 6px; margin-top: 8px; border: 1px solid #cbd5e1; }
   </style>
 </head>
 <body>
@@ -46,6 +50,7 @@
     <div class="tabs">
       <button class="tab-btn active" onclick="switchTab('logTab')">Log Catch</button>
       <button class="tab-btn" onclick="switchTab('lureTab')">Lure Locker</button>
+      <button class="tab-btn" onclick="switchTab('wishlistTab')">Wish List</button>
       <button class="tab-btn" onclick="switchTab('historyTab')">Logbook</button>
       <button class="tab-btn" onclick="switchTab('reportsTab')">Reports</button>
     </div>
@@ -170,7 +175,47 @@
       </div>
     </div>
 
-    <!-- TAB 3: LOGBOOK & EXPORT/IMPORT -->
+    <!-- TAB 3: LURE WISH LIST -->
+    <div id="wishlistTab" class="tab-content">
+      <form id="wishlistForm">
+        <div class="form-group">
+          <label>Lure Name / Description</label>
+          <input type="text" id="wishLureName" placeholder="e.g. Silver Horde Coho Killer" required>
+        </div>
+        <div class="grid">
+          <div class="form-group">
+            <label>Recommended By (Friend)</label>
+            <input type="text" id="wishFriend" placeholder="e.g. Catherine" required>
+          </div>
+          <div class="form-group">
+            <label>Category / Type</label>
+            <select id="wishType">
+              <option value="Spoon">Spoon</option>
+              <option value="Flasher + Spoon">Flasher + Spoon</option>
+              <option value="Flasher + Hoochie">Flasher + Hoochie</option>
+              <option value="Plug / Ace Hi">Plug / Ace Hi</option>
+              <option value="Cut-Plug Herring">Cut-Plug Herring</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Color / Pattern & Notes</label>
+          <input type="text" id="wishNotes" placeholder="e.g. Cookies & Cream, 42ft wire off Point No Point">
+        </div>
+        <div class="form-group">
+          <label>Upload / Take Photo (Optional)</label>
+          <input type="file" id="wishPhoto" accept="image/*">
+        </div>
+        <button type="submit" class="btn-submit" style="background:#7c3aed;">🎁 Add to Wish List</button>
+      </form>
+
+      <div style="margin-top: 20px;">
+        <h3>Friend Recommended Wish List</h3>
+        <div id="wishlistContainer"></div>
+      </div>
+    </div>
+
+    <!-- TAB 4: LOGBOOK & EXPORT/IMPORT -->
     <div id="historyTab" class="tab-content">
       <div id="logEntries"></div>
       
@@ -196,7 +241,7 @@
       </div>
     </div>
 
-    <!-- TAB 4: REPORTS & ANALYTICS -->
+    <!-- TAB 5: REPORTS & ANALYTICS -->
     <div id="reportsTab" class="tab-content">
       <div id="reportsContainer"></div>
     </div>
@@ -237,28 +282,19 @@
         const res = await fetch(url);
         const data = await res.json();
 
-        if (!data.predictions || data.predictions.length === 0) {
-          return 'Tide data unavailable';
-        }
+        if (!data.predictions || data.predictions.length === 0) return 'Tide data unavailable';
 
         const preds = data.predictions.map(p => {
           const parts = p.t.split(' ');
           const dateParts = parts[0].split('-');
           const timeParts = parts[1].split(':');
-          const pDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2], timeParts[0], timeParts[1]);
-          return { time: pDate, type: p.type, height: p.v };
+          return { time: new Date(dateParts[0], dateParts[1] - 1, dateParts[2], timeParts[0], timeParts[1]), type: p.type, height: p.v };
         });
 
-        let prevTide = null;
-        let nextTide = null;
-
+        let prevTide = null, nextTide = null;
         for (let i = 0; i < preds.length; i++) {
-          if (preds[i].time <= entryDate) {
-            prevTide = preds[i];
-          } else if (preds[i].time > entryDate && !nextTide) {
-            nextTide = preds[i];
-            break;
-          }
+          if (preds[i].time <= entryDate) prevTide = preds[i];
+          else if (preds[i].time > entryDate && !nextTide) { nextTide = preds[i]; break; }
         }
 
         if (!prevTide || !nextTide) return 'Tide out of range';
@@ -266,22 +302,10 @@
         const diffPrevMins = Math.round((entryDate - prevTide.time) / 60000);
         const diffNextMins = Math.round((nextTide.time - entryDate) / 60000);
 
-        if (diffPrevMins <= 35) {
-          return `Slack (${prevTide.type === 'H' ? 'High' : 'Low'}) - ${prevTide.height}ft`;
-        }
-        if (diffNextMins <= 35) {
-          return `Slack (${nextTide.type === 'H' ? 'High' : 'Low'}) - ${nextTide.height}ft`;
-        }
+        if (diffPrevMins <= 35) return `Slack (${prevTide.type === 'H' ? 'High' : 'Low'}) - ${prevTide.height}ft`;
+        if (diffNextMins <= 35) return `Slack (${nextTide.type === 'H' ? 'High' : 'Low'}) - ${nextTide.height}ft`;
 
-        let stage = '';
-        if (prevTide.type === 'H' && nextTide.type === 'L') {
-          stage = 'Ebb (Falling)';
-        } else if (prevTide.type === 'L' && nextTide.type === 'H') {
-          stage = 'Flood (Rising)';
-        } else {
-          stage = prevTide.type === 'H' ? 'Ebb' : 'Flood';
-        }
-
+        let stage = (prevTide.type === 'H' && nextTide.type === 'L') ? 'Ebb (Falling)' : 'Flood (Rising)';
         const hrs = (diffPrevMins / 60).toFixed(1);
         return `${stage} (${hrs}h after ${prevTide.type === 'H' ? 'High' : 'Low'} ${prevTide.height}ft)`;
 
@@ -313,6 +337,7 @@
       const btn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(tabId));
       if (btn) btn.classList.add('active');
 
+      if (tabId === 'wishlistTab') renderWishlist();
       if (tabId === 'reportsTab') renderReports();
     }
 
@@ -334,17 +359,9 @@
 
       list.innerHTML = lures.map(l => {
         const lureLabel = `${l.name} (${l.color})`;
-        
-        const matches = logs.filter(log => 
-          log.lure === lureLabel || (l.name && log.lure && log.lure.includes(l.name))
-        );
-
+        const matches = logs.filter(log => log.lure === lureLabel || (l.name && log.lure && log.lure.includes(l.name)));
         const catchListHtml = matches.length > 0
-          ? matches.map(c => `
-              <li style="margin-bottom: 4px;">
-                <strong>${new Date(c.timestamp).toLocaleDateString()}</strong>: ${c.species} (${c.outcome}) — ${c.marineArea} @ ${c.depth}ft
-              </li>
-            `).join('')
+          ? matches.map(c => `<li style="margin-bottom: 4px;"><strong>${new Date(c.timestamp).toLocaleDateString()}</strong>: ${c.species} (${c.outcome}) — ${c.marineArea} @ ${c.depth}ft</li>`).join('')
           : '<li style="color:#94a3b8; list-style:none;">No catches logged yet for this lure.</li>';
 
         return `
@@ -353,17 +370,11 @@
               <span>${l.name}</span>
               <button class="btn-danger" onclick="deleteLure('${l.id}')">Delete</button>
             </div>
-            <div class="card-meta">
-              <span class="badge">${l.type}</span> <strong>Color:</strong> ${l.color}
-            </div>
-            <div class="card-meta" style="margin-top: 8px; font-weight: 600; color: #1e3a8a;">
-              🏆 Total Catches: ${matches.length}
-            </div>
+            <div class="card-meta"><span class="badge">${l.type}</span> <strong>Color:</strong> ${l.color}</div>
+            <div class="card-meta" style="margin-top: 8px; font-weight: 600; color: #1e3a8a;">🏆 Total Catches: ${matches.length}</div>
             <details style="margin-top: 6px; font-size: 0.8rem; color: #334155;">
               <summary style="cursor: pointer; font-weight: 600; color: #2563eb;">View Linked Catches (${matches.length})</summary>
-              <ul style="padding-left: 18px; margin-top: 6px; margin-bottom: 4px;">
-                ${catchListHtml}
-              </ul>
+              <ul style="padding-left: 18px; margin-top: 6px; margin-bottom: 4px;">${catchListHtml}</ul>
             </details>
           </div>
         `;
@@ -375,23 +386,123 @@
     document.getElementById('lureForm').addEventListener('submit', (e) => {
       e.preventDefault();
       const lures = getLures();
-      const newLure = {
+      lures.push({
         id: Date.now().toString(),
         name: document.getElementById('lureName').value,
         type: document.getElementById('lureType').value,
         color: document.getElementById('lureColor').value
-      };
-      lures.push(newLure);
+      });
       localStorage.setItem('salmonLures', JSON.stringify(lures));
       document.getElementById('lureForm').reset();
       renderLures();
     });
 
     function deleteLure(id) {
-      let lures = getLures();
-      lures = lures.filter(l => l.id !== id);
+      let lures = getLures().filter(l => l.id !== id);
       localStorage.setItem('salmonLures', JSON.stringify(lures));
       renderLures();
+    }
+
+    /* WISH LIST LOGIC */
+    function getWishlist() {
+      return JSON.parse(localStorage.getItem('salmonWishlist') || '[]');
+    }
+
+    function renderWishlist() {
+      const wishList = getWishlist();
+      const container = document.getElementById('wishlistContainer');
+
+      if (wishList.length === 0) {
+        container.innerHTML = '<p style="text-align:center; color:#64748b;">No wish list lures added yet.</p>';
+        return;
+      }
+
+      container.innerHTML = wishList.map(item => `
+        <div class="item-card" style="border-left-color: #7c3aed;">
+          <div class="card-title">
+            <span>${item.name}</span>
+            <div style="display:flex; gap:4px;">
+              <button class="btn-action" onclick="moveToLocker('${item.id}')">Bought It (+ Locker)</button>
+              <button class="btn-danger" onclick="deleteWishItem('${item.id}')">Delete</button>
+            </div>
+          </div>
+          <div class="card-meta">🗣️ <strong>Recommended By:</strong> ${item.friend}</div>
+          <div class="card-meta"><span class="badge" style="background:#f3e8ff; color:#6b21a8;">${item.type}</span> ${item.notes ? item.notes : ''}</div>
+          ${item.photo ? `<img src="${item.photo}" class="wishlist-img" alt="${item.name}">` : ''}
+        </div>
+      `).join('');
+    }
+
+    // Helper to resize uploaded photo to under 50KB for local storage
+    function processPhoto(fileInput, callback) {
+      const file = fileInput.files[0];
+      if (!file) return callback(null);
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const maxDim = 400;
+          let w = img.width, h = img.height;
+          if (w > h) { if (w > maxDim) { h *= maxDim / w; w = maxDim; } }
+          else { if (h > maxDim) { w *= maxDim / h; h = maxDim; } }
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          callback(canvas.toDataURL('image/jpeg', 0.7));
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    document.getElementById('wishlistForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const photoInput = document.getElementById('wishPhoto');
+
+      processPhoto(photoInput, (base64Photo) => {
+        const wishlist = getWishlist();
+        wishlist.push({
+          id: Date.now().toString(),
+          name: document.getElementById('wishLureName').value,
+          friend: document.getElementById('wishFriend').value,
+          type: document.getElementById('wishType').value,
+          notes: document.getElementById('wishNotes').value,
+          photo: base64Photo
+        });
+        localStorage.setItem('salmonWishlist', JSON.stringify(wishlist));
+        document.getElementById('wishlistForm').reset();
+        renderWishlist();
+      });
+    });
+
+    function deleteWishItem(id) {
+      const wishlist = getWishlist().filter(i => i.id !== id);
+      localStorage.setItem('salmonWishlist', JSON.stringify(wishlist));
+      renderWishlist();
+    }
+
+    function moveToLocker(id) {
+      const wishlist = getWishlist();
+      const item = wishlist.find(i => i.id === id);
+      if (!item) return;
+
+      // Add to Lure Locker
+      const lures = getLures();
+      lures.push({
+        id: Date.now().toString(),
+        name: item.name,
+        type: item.type,
+        color: item.notes || `Rec by ${item.friend}`
+      });
+      localStorage.setItem('salmonLures', JSON.stringify(lures));
+
+      // Remove from Wish list
+      deleteWishItem(id);
+      renderLures();
+      alert(`Moved "${item.name}" into your active Lure Locker!`);
     }
 
     function renderLogs() {
@@ -407,15 +518,9 @@
             <span>${item.species} (${item.outcome})</span>
             <span style="font-size:0.75rem; color:#64748b;">${new Date(item.timestamp).toLocaleDateString()} ${new Date(item.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
           </div>
-          <div class="card-meta">
-            📍 <strong>${item.marineArea}</strong> | ☁️ ${item.weather}
-          </div>
-          <div class="card-meta">
-            🎣 <strong>Lure:</strong> ${item.lure}
-          </div>
-          <div class="card-meta">
-            ⚓ <strong>Depth:</strong> ${item.depth}ft | 🌊 <strong>FOW:</strong> ${item.fow}ft @ ${item.speed}kts
-          </div>
+          <div class="card-meta">📍 <strong>${item.marineArea}</strong> | ☁️ ${item.weather}</div>
+          <div class="card-meta">🎣 <strong>Lure:</strong> ${item.lure}</div>
+          <div class="card-meta">⚓ <strong>Depth:</strong> ${item.depth}ft | 🌊 <strong>FOW:</strong> ${item.fow}ft @ ${item.speed}kts</div>
           ${item.tide ? `<div class="card-meta">🌊 <strong>Tide:</strong> ${item.tide}</div>` : ''}
           ${item.size ? `<div class="card-meta">📏 <strong>Size:</strong> ${item.size}</div>` : ''}
           ${item.notes ? `<div class="notes">"${item.notes}"</div>` : ''}
@@ -451,9 +556,7 @@
       renderLogs();
       switchTab('historyTab');
 
-      // Asynchronously calculate tide after saving entry
       const calculatedTide = await getTideStage(entry.timestamp);
-      
       const currentLogs = JSON.parse(localStorage.getItem('salmonLogs') || '[]');
       const matchIndex = currentLogs.findIndex(l => l.id === entryId || (l.timestamp === entry.timestamp && l.notes === entry.notes));
       if (matchIndex !== -1) {
@@ -499,12 +602,10 @@
         const text = e.target.result;
         const lines = text.split('\n');
         const logs = JSON.parse(localStorage.getItem('salmonLogs') || '[]');
-        
         let startIndex = lines[0].toLowerCase().includes('timestamp') ? 1 : 0;
 
         for (let i = startIndex; i < lines.length; i++) {
           if (!lines[i].trim()) continue;
-          
           const cols = lines[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || lines[i].split(',');
           const clean = cols.map(c => c ? c.replace(/^"|"$/g, '').trim() : '');
 
@@ -544,7 +645,6 @@
 
       lines.forEach(line => {
         if (!line.trim()) return;
-        
         const entry = {
           id: Date.now().toString() + Math.random(),
           timestamp: new Date().toISOString().slice(0, 16),
@@ -563,21 +663,14 @@
 
         const lower = line.toLowerCase();
         if (lower.includes('ma 9') || lower.includes('area 9')) entry.marineArea = 'MA 9 (Admiralty Inlet)';
-        
-        if (lower.includes('coho') || lower.includes('silver')) {
-          entry.species = lower.includes('wild') ? 'Coho - Wild' : 'Coho - Hatchery';
-        }
-        if (lower.includes('chinook') || lower.includes('king')) {
-          entry.species = lower.includes('wild') ? 'Chinook - Wild' : 'Chinook - Hatchery';
-        }
+        if (lower.includes('coho') || lower.includes('silver')) entry.species = lower.includes('wild') ? 'Coho - Wild' : 'Coho - Hatchery';
+        if (lower.includes('chinook') || lower.includes('king')) entry.species = lower.includes('wild') ? 'Chinook - Wild' : 'Chinook - Hatchery';
         if (lower.includes('pink')) entry.species = 'Pink';
-
         if (lower.includes('released')) entry.outcome = 'Released';
         if (lower.includes('lost') || lower.includes('strike')) entry.outcome = 'Lost / Strike';
 
         const depthMatch = line.match(/(\d+)\s*(?:ft|')?\s*(?:wire|depth|downrigger)/i);
         if (depthMatch) entry.depth = depthMatch[1];
-
         const fowMatch = line.match(/(\d+)\s*(?:ft|')?\s*(?:fow|water)/i);
         if (fowMatch) entry.fow = fowMatch[1];
 
@@ -602,20 +695,11 @@
 
       const totalCatches = logs.length;
 
-      // 1. Top Lures
       const lureCounts = {};
       logs.forEach(l => { lureCounts[l.lure] = (lureCounts[l.lure] || 0) + 1; });
       const sortedLures = Object.entries(lureCounts).sort((a, b) => b[1] - a[1]);
 
-      // 2. Best Time of Day
-      const timeBuckets = {
-        'Early Morning (5am-9am)': 0,
-        'Mid Morning (9am-12pm)': 0,
-        'Afternoon (12pm-5pm)': 0,
-        'Evening (5pm-9pm)': 0,
-        'Night (9pm-5am)': 0
-      };
-
+      const timeBuckets = { 'Early Morning (5am-9am)': 0, 'Mid Morning (9am-12pm)': 0, 'Afternoon (12pm-5pm)': 0, 'Evening (5pm-9pm)': 0, 'Night (9pm-5am)': 0 };
       logs.forEach(l => {
         if (!l.timestamp) return;
         const hour = new Date(l.timestamp).getHours();
@@ -626,32 +710,21 @@
         else timeBuckets['Night (9pm-5am)']++;
       });
 
-      const get5ftLabel = (val) => {
-        const start = Math.floor(val / 5) * 5;
-        return `${start} - ${start + 4} ft`;
-      };
+      const get5ftLabel = (val) => `${Math.floor(val / 5) * 5} - ${Math.floor(val / 5) * 5 + 4} ft`;
 
-      // 3. Top Wire Success
       const wireCounts = {};
       logs.forEach(l => {
         if (!l.depth) return;
         const d = parseFloat(l.depth);
-        if (!isNaN(d)) {
-          const label = get5ftLabel(d);
-          wireCounts[label] = (wireCounts[label] || 0) + 1;
-        }
+        if (!isNaN(d)) wireCounts[get5ftLabel(d)] = (wireCounts[get5ftLabel(d)] || 0) + 1;
       });
       const sortedWire = Object.entries(wireCounts).sort((a, b) => b[1] - a[1]);
 
-      // 4. Top FOW Success
       const fowCounts = {};
       logs.forEach(l => {
         if (!l.fow) return;
         const f = parseFloat(l.fow);
-        if (!isNaN(f)) {
-          const label = get5ftLabel(f);
-          fowCounts[label] = (fowCounts[label] || 0) + 1;
-        }
+        if (!isNaN(f)) fowCounts[get5ftLabel(f)] = (fowCounts[get5ftLabel(f)] || 0) + 1;
       });
       const sortedFow = Object.entries(fowCounts).sort((a, b) => b[1] - a[1]);
 
@@ -688,16 +761,12 @@
 
         <div class="item-card" style="border-left-color:#0284c7;">
           <h3 style="margin-top:0; color:#1e3a8a; font-size:0.95rem;">⚓ Top Wire Success (5 ft Increments)</h3>
-          ${sortedWire.length > 0 
-            ? sortedWire.slice(0, 5).map(([bracket, cnt]) => renderBar(bracket, cnt)).join('')
-            : '<p style="font-size:0.82rem; color:#64748b; margin:0;">No depth data logged yet.</p>'}
+          ${sortedWire.length > 0 ? sortedWire.slice(0, 5).map(([bracket, cnt]) => renderBar(bracket, cnt)).join('') : '<p style="font-size:0.82rem; color:#64748b; margin:0;">No depth data logged yet.</p>'}
         </div>
 
         <div class="item-card" style="border-left-color:#a855f7;">
           <h3 style="margin-top:0; color:#1e3a8a; font-size:0.95rem;">🌊 Top FOW Success (5 ft Increments)</h3>
-          ${sortedFow.length > 0 
-            ? sortedFow.slice(0, 5).map(([bracket, cnt]) => renderBar(bracket, cnt)).join('')
-            : '<p style="font-size:0.82rem; color:#64748b; margin:0;">No FOW data logged yet.</p>'}
+          ${sortedFow.length > 0 ? sortedFow.slice(0, 5).map(([bracket, cnt]) => renderBar(bracket, cnt)).join('') : '<p style="font-size:0.82rem; color:#64748b; margin:0;">No FOW data logged yet.</p>'}
         </div>
       `;
     }
