@@ -1,4 +1,4 @@
-const CACHE_NAME = 'salmon-log-v9';
+const CACHE_NAME = 'salmon-log-v10';
 const ASSETS = ['./', './index.html', './manifest.json'];
 
 self.addEventListener('install', (e) => {
