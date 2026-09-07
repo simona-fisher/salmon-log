@@ -89,6 +89,11 @@
           </select>
         </div>
 
+        <div class="form-group" style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; margin-top: 4px;">
+          <input type="checkbox" id="flasherUsed" checked style="width: 20px; height: 20px; margin: 0; cursor: pointer;">
+          <label for="flasherUsed" style="margin: 0; font-size: 0.9rem; font-weight: 600; cursor: pointer; color: #1e3a8a;">Flasher Used?</label>
+        </div>
+
         <div class="grid">
           <div class="form-group">
             <label>Downrigger Depth (ft)</label>
@@ -650,7 +655,7 @@
             🕒 ${new Date(item.timestamp).toLocaleDateString()} ${new Date(item.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
           </div>
           <div class="card-meta">📍 <strong>${item.marineArea}</strong> | ☁️ ${item.weather}</div>
-          <div class="card-meta">🎣 <strong>Lure:</strong> ${item.lure}</div>
+          <div class="card-meta">🎣 <strong>Lure:</strong> ${item.lure} | 🚩 <strong>Flasher:</strong> ${item.flasherUsed !== false ? 'Yes' : 'No'}</div>
           <div class="card-meta">⚓ <strong>Depth:</strong> ${item.depth}ft | 🌊 <strong>FOW:</strong> ${item.fow}ft @ ${item.speed}kts</div>
           ${item.tide ? `<div class="card-meta">🌊 <strong>Tide:</strong> ${item.tide}</div>` : ''}
           ${item.length ? `<div class="card-meta">📏 <strong>Length:</strong> ${item.length}</div>` : ''}
@@ -675,6 +680,7 @@
       const lureSelect = document.getElementById('lureSelect');
       if (item.lure) lureSelect.value = item.lure;
 
+      document.getElementById('flasherUsed').checked = item.flasherUsed !== false;
       document.getElementById('depth').value = item.depth || '';
       document.getElementById('fow').value = item.fow || '';
       document.getElementById('speed').value = item.speed || '';
@@ -696,6 +702,7 @@
     function resetCatchForm() {
       editingEntryId = null;
       document.getElementById('catchForm').reset();
+      document.getElementById('flasherUsed').checked = true;
       setLocalTimestamp();
       
       const submitBtn = document.querySelector('#catchForm .btn-submit');
@@ -721,6 +728,7 @@
         marineArea: document.getElementById('marineArea').value,
         species: document.getElementById('species').value,
         lure: document.getElementById('lureSelect').value,
+        flasherUsed: document.getElementById('flasherUsed').checked,
         depth: document.getElementById('depth').value,
         fow: document.getElementById('fow').value,
         speed: document.getElementById('speed').value,
@@ -763,12 +771,13 @@
       const logs = getLogs();
       if (!logs.length) return alert('No data to export.');
       
-      const headers = ['Timestamp', 'Marine Area', 'Species', 'Linked Lure', 'Downrigger Depth (ft)', 'FOW (ft)', 'Speed (kts)', 'Weather', 'Outcome', 'Length', 'Weight', 'Tide Stage', 'Notes'];
+      const headers = ['Timestamp', 'Marine Area', 'Species', 'Linked Lure', 'Flasher Used', 'Downrigger Depth (ft)', 'FOW (ft)', 'Speed (kts)', 'Weather', 'Outcome', 'Length', 'Weight', 'Tide Stage', 'Notes'];
       const rows = logs.map(l => [
         l.timestamp,
         `"${l.marineArea}"`,
         `"${l.species}"`,
         `"${l.lure}"`,
+        l.flasherUsed !== false ? 'Yes' : 'No',
         l.depth,
         l.fow,
         l.speed,
@@ -797,6 +806,7 @@
         const lines = text.split('\n');
         const logs = getLogs();
         let startIndex = lines[0].toLowerCase().includes('timestamp') ? 1 : 0;
+        let hasFlasherCol = lines[0].toLowerCase().includes('flasher used');
 
         for (let i = startIndex; i < lines.length; i++) {
           if (!lines[i].trim()) continue;
@@ -804,21 +814,23 @@
           const clean = cols.map(c => c ? c.replace(/^"|"$/g, '').trim() : '');
 
           if (clean.length >= 5) {
+            const offset = hasFlasherCol ? 1 : 0;
             logs.push({
               id: Date.now().toString() + Math.random().toString(36).substring(2, 6),
               timestamp: clean[0] || new Date().toISOString().slice(0, 16),
               marineArea: clean[1] || 'MA 10 (Seattle/Bremerton)',
               species: clean[2] || 'Coho - Hatchery',
               lure: clean[3] || 'Unknown Lure',
-              depth: clean[4] || '0',
-              fow: clean[5] || '0',
-              speed: clean[6] || '0',
-              weather: clean[7] || 'Overcast',
-              outcome: clean[8] || 'Kept',
-              length: clean[9] || '',
-              weight: clean[10] || '',
-              tide: clean[11] || '',
-              notes: clean[12] || ''
+              flasherUsed: hasFlasherCol ? (clean[4].toLowerCase() !== 'no') : true,
+              depth: clean[4 + offset] || '0',
+              fow: clean[5 + offset] || '0',
+              speed: clean[6 + offset] || '0',
+              weather: clean[7 + offset] || 'Overcast',
+              outcome: clean[8 + offset] || 'Kept',
+              length: clean[9 + offset] || '',
+              weight: clean[10 + offset] || '',
+              tide: clean[11 + offset] || '',
+              notes: clean[12 + offset] || ''
             });
           }
         }
@@ -846,6 +858,7 @@
           marineArea: 'MA 10 (Seattle/Bremerton)',
           species: 'Coho - Hatchery',
           lure: 'Keep Import',
+          flasherUsed: !line.toLowerCase().includes('no flasher'),
           depth: '0',
           fow: '0',
           speed: '2.4',
