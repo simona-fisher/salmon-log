@@ -39,7 +39,6 @@
     .notes { font-style: italic; color: #64748b; margin-top: 4px; font-size: 0.82rem; }
     .badge { background: #dbeafe; color: #1e40af; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
     
-    /* Wishlist Photo Styling */
     .wishlist-img { width: 100%; max-height: 180px; object-fit: cover; border-radius: 6px; margin-top: 8px; border: 1px solid #cbd5e1; }
   </style>
 </head>
@@ -157,6 +156,7 @@
               <option value="Spoon">Spoon</option>
               <option value="Flasher + Spoon">Flasher + Spoon</option>
               <option value="Flasher + Hoochie">Flasher + Hoochie</option>
+              <option value="Hoochie / Squid">Hoochie / Squid</option>
               <option value="Plug / Ace Hi">Plug / Ace Hi</option>
               <option value="Cut-Plug Herring">Cut-Plug Herring</option>
             </select>
@@ -168,6 +168,8 @@
         </div>
         <button type="submit" class="btn-submit">+ Add Lure to Locker</button>
       </form>
+
+      <button type="button" class="btn-action" style="background:#059669; margin-top:12px; width:100%; padding:9px;" onclick="importPresetLures()">📥 Import Preset Keep Lures List</button>
 
       <div style="margin-top: 20px;">
         <h3>Your Lure Inventory</h3>
@@ -193,6 +195,7 @@
               <option value="Spoon">Spoon</option>
               <option value="Flasher + Spoon">Flasher + Spoon</option>
               <option value="Flasher + Hoochie">Flasher + Hoochie</option>
+              <option value="Hoochie / Squid">Hoochie / Squid</option>
               <option value="Plug / Ace Hi">Plug / Ace Hi</option>
               <option value="Cut-Plug Herring">Cut-Plug Herring</option>
             </select>
@@ -258,7 +261,6 @@
       document.getElementById('timestamp').value = now.toISOString().slice(0, 16);
     }
 
-    // NOAA Kingston (Appletree Cove) Station 9445639 Tide Stage Lookup
     async function getTideStage(timestampStr) {
       try {
         const entryDate = new Date(timestampStr);
@@ -383,6 +385,50 @@
       populateLureDropdown();
     }
 
+    function importPresetLures() {
+      const keepLures = [
+        { name: "Silver Horde Kingfisher Lite #4 - Super Pearl UV", type: "Spoon" },
+        { name: "Silver Horde Ace Hi Fly - Glow Pink", type: "Hootchie" },
+        { name: "Silver Horde Ace Hi Fly - UV Blue Spatter Back", type: "Hootchie" },
+        { name: "Silver Horde Coho Killer - Cop Car", type: "Spoon" },
+        { name: "Silver Horde Coho Killer - White Scale / Pink Squiddy", type: "Spoon" },
+        { name: "Silver Horde Coho Killer - Chartreuse White Glow", type: "Spoon" },
+        { name: "Custom Squid - Hawaiian Special (Daniel)", type: "Hootchie" },
+        { name: "Custom Squid - Chuck Sterling Purple Flash", type: "Hootchie" }
+      ];
+
+      const currentLures = getLures();
+      let addedCount = 0;
+
+      keepLures.forEach(item => {
+        let modelName = item.name;
+        let colorPattern = 'Standard';
+
+        if (item.name.includes(' - ')) {
+          const parts = item.name.split(' - ');
+          modelName = parts[0].trim();
+          colorPattern = parts[1].trim();
+        }
+
+        let category = item.type === 'Hootchie' ? 'Flasher + Hoochie' : item.type;
+
+        const exists = currentLures.some(l => l.name === modelName && l.color === colorPattern);
+        if (!exists) {
+          currentLures.push({
+            id: Date.now().toString() + Math.random(),
+            name: modelName,
+            type: category,
+            color: colorPattern
+          });
+          addedCount++;
+        }
+      });
+
+      localStorage.setItem('salmonLures', JSON.stringify(currentLures));
+      renderLures();
+      alert(`Imported ${addedCount} new lure(s) into your Lure Locker!`);
+    }
+
     document.getElementById('lureForm').addEventListener('submit', (e) => {
       e.preventDefault();
       const lures = getLures();
@@ -403,7 +449,6 @@
       renderLures();
     }
 
-    /* WISH LIST LOGIC */
     function getWishlist() {
       return JSON.parse(localStorage.getItem('salmonWishlist') || '[]');
     }
@@ -433,7 +478,6 @@
       `).join('');
     }
 
-    // Helper to resize uploaded photo to under 50KB for local storage
     function processPhoto(fileInput, callback) {
       const file = fileInput.files[0];
       if (!file) return callback(null);
@@ -489,7 +533,6 @@
       const item = wishlist.find(i => i.id === id);
       if (!item) return;
 
-      // Add to Lure Locker
       const lures = getLures();
       lures.push({
         id: Date.now().toString(),
@@ -499,7 +542,6 @@
       });
       localStorage.setItem('salmonLures', JSON.stringify(lures));
 
-      // Remove from Wish list
       deleteWishItem(id);
       renderLures();
       alert(`Moved "${item.name}" into your active Lure Locker!`);
