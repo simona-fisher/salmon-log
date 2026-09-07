@@ -8,181 +8,41 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <style>
-    :root {
-      --primary: #1e3a8a;
-      --accent: #2563eb;
-      --bg: #f8fafc;
-      --card: #ffffff;
-      --text: #1e293b;
-      --border: #cbd5e1;
-    }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: var(--bg);
-      margin: 0;
-      padding: 16px;
-      color: var(--text);
-    }
-    .container {
-      max-width: 500px;
-      margin: 0 auto;
-      background: var(--card);
-      border-radius: 14px;
-      padding: 20px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    }
-    h1 {
-      font-size: 1.4rem;
-      color: var(--primary);
-      text-align: center;
-      margin-top: 0;
-      margin-bottom: 16px;
-    }
-    h2, h3 {
-      font-size: 1.1rem;
-      color: var(--primary);
-      margin-top: 12px;
-      margin-bottom: 12px;
-    }
-    .tabs {
-      display: flex;
-      gap: 4px;
-      margin-bottom: 20px;
-      background: #e2e8f0;
-      padding: 4px;
-      border-radius: 10px;
-    }
-    .tab-btn {
-      flex: 1;
-      padding: 10px 2px;
-      border: none;
-      background: transparent;
-      color: #475569;
-      font-weight: 600;
-      font-size: 0.82rem;
-      border-radius: 8px;
-      cursor: pointer;
-      text-align: center;
-      transition: background 0.2s, color 0.2s;
-    }
-    .tab-btn.active {
-      background: var(--primary);
-      color: #ffffff;
-    }
-    .tab-content {
-      display: none;
-    }
-    .tab-content.active {
-      display: block;
-    }
-    .form-group {
-      margin-bottom: 12px;
-    }
-    label {
-      display: block;
-      font-size: 0.85rem;
-      font-weight: 600;
-      margin-bottom: 4px;
-      color: #475569;
-    }
-    input, select, textarea {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-size: 1rem;
-      box-sizing: border-box;
-      background: #fff;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-    .btn-action {
-      width: 100%;
-      padding: 12px;
-      border: none;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 1rem;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-    .btn-submit {
-      background: var(--accent);
-      color: white;
-    }
-    .btn-export {
-      background: #059669;
-      color: white;
-      margin-bottom: 16px;
-    }
-    .log-list, .lure-list {
-      margin-top: 16px;
-    }
-    .log-card, .stat-card {
-      background: #f1f5f9;
-      border-left: 4px solid var(--accent);
-      border-radius: 6px;
-      padding: 12px;
-      margin-bottom: 10px;
-      font-size: 0.9rem;
-      position: relative;
-    }
-    .log-title {
-      font-weight: bold;
-      display: flex;
-      justify-content: space-between;
-      color: var(--primary);
-    }
-    .log-meta {
-      margin-top: 4px;
-      color: #334155;
-    }
-    .notes {
-      font-style: italic;
-      color: #64748b;
-      margin-top: 4px;
-    }
-    .stats-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 16px;
-    }
-    .stat-box {
-      background: #f1f5f9;
-      border-radius: 8px;
-      padding: 12px;
-      text-align: center;
-    }
-    .stat-number {
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: var(--primary);
-    }
-    .stat-label {
-      font-size: 0.75rem;
-      color: #64748b;
-      text-transform: uppercase;
-      font-weight: 600;
-    }
-    .delete-btn {
-      color: #dc2626;
-      background: none;
-      border: none;
-      font-size: 0.8rem;
-      cursor: pointer;
-      float: right;
-    }
+    :root { --primary: #1e3a8a; --accent: #2563eb; --bg: #f8fafc; --card: #ffffff; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); margin: 0; padding: 12px; color: #1e293b; }
+    .container { max-width: 500px; margin: 0 auto; background: var(--card); border-radius: 14px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    h1 { font-size: 1.3rem; color: var(--primary); text-align: center; margin-top: 0; margin-bottom: 12px; }
+    
+    /* Navigation Tabs */
+    .tabs { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
+    .tab-btn { flex: 1; padding: 8px 2px; font-size: 0.78rem; font-weight: 600; border: none; background: #e2e8f0; color: #475569; border-radius: 6px; cursor: pointer; text-align: center; }
+    .tab-btn.active { background: var(--primary); color: white; }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .form-group { margin-bottom: 10px; }
+    label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 4px; color: #475569; }
+    input, select, textarea { width: 100%; padding: 9px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; box-sizing: border-box; background: #fff; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    
+    button { width: 100%; padding: 11px; border: none; border-radius: 8px; font-weight: 600; font-size: 0.95rem; cursor: pointer; }
+    .btn-submit { background: var(--accent); color: white; margin-top: 8px; }
+    .btn-export { background: #059669; color: white; margin-top: 12px; }
+    .btn-danger { background: #ef4444; color: white; padding: 4px 8px; font-size: 0.75rem; border-radius: 4px; width: auto; }
+
+    /* Cards */
+    .item-card { background: #f1f5f9; border-left: 4px solid var(--accent); border-radius: 6px; padding: 10px 12px; margin-bottom: 10px; font-size: 0.88rem; }
+    .card-title { font-weight: bold; display: flex; justify-content: space-between; align-items: center; color: var(--primary); }
+    .card-meta { margin-top: 4px; color: #334155; }
+    .notes { font-style: italic; color: #64748b; margin-top: 4px; font-size: 0.82rem; }
+    .badge { background: #dbeafe; color: #1e40af; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>🎣 Puget Sound Salmon Log</h1>
 
-    <!-- Navigation Tabs -->
     <div class="tabs">
       <button class="tab-btn active" onclick="switchTab('logTab')">Log Catch</button>
       <button class="tab-btn" onclick="switchTab('lureTab')">Lure Locker</button>
@@ -197,13 +57,13 @@
           <label>Date & Time</label>
           <input type="datetime-local" id="timestamp" required>
         </div>
-
+        
         <div class="grid">
           <div class="form-group">
             <label>Marine Area</label>
             <select id="marineArea">
-              <option value="MA 9">MA 9</option>
-              <option value="MA 10">MA 10</option>
+              <option value="MA 9 (Admiralty Inlet)">MA 9</option>
+              <option value="MA 10 (Seattle/Bremerton)">MA 10</option>
               <option value="MA 8-1 / 8-2">MA 8-1 / 8-2</option>
               <option value="Other">Other</option>
             </select>
@@ -211,8 +71,8 @@
           <div class="form-group">
             <label>Species</label>
             <select id="species">
-              <option value="Chinook">Chinook</option>
-              <option value="Coho">Coho</option>
+              <option value="Chinook (King)">Chinook</option>
+              <option value="Coho (Silver)">Coho</option>
               <option value="Pink">Pink</option>
               <option value="Chum">Chum</option>
             </select>
@@ -221,17 +81,19 @@
 
         <div class="form-group">
           <label>Selected Lure / Rigging</label>
-          <select id="lureSelect" required></select>
+          <select id="lureSelect" required>
+            <!-- Populated dynamically from Lure DB -->
+          </select>
         </div>
 
         <div class="grid">
           <div class="form-group">
             <label>Downrigger Depth (ft)</label>
-            <input type="number" id="depth" placeholder="e.g. 60">
+            <input type="number" id="depth" placeholder="e.g. 60" required>
           </div>
           <div class="form-group">
             <label>FOW - Water Depth (ft)</label>
-            <input type="number" id="fow" placeholder="e.g. 110">
+            <input type="number" id="fow" placeholder="e.g. 110" required>
           </div>
         </div>
 
@@ -244,10 +106,11 @@
             <label>Weather Conditions</label>
             <select id="weather">
               <option value="Overcast">Overcast</option>
-              <option value="Sunny">Sunny</option>
-              <option value="Rain">Rain</option>
-              <option value="Fog">Fog</option>
+              <option value="Sunny / Clear">Sunny / Clear</option>
               <option value="Partly Cloudy">Partly Cloudy</option>
+              <option value="Rain / Drizzle">Rain / Drizzle</option>
+              <option value="Windy / Chop">Windy / Chop</option>
+              <option value="Foggy">Foggy</option>
             </select>
           </div>
         </div>
@@ -272,53 +135,72 @@
           <textarea id="notes" rows="2" placeholder="High slack tide, near oil docks..."></textarea>
         </div>
 
-        <button type="submit" class="btn-action btn-submit">💾 Save Catch Entry</button>
+        <button type="submit" class="btn-submit">💾 Save Catch Entry</button>
       </form>
     </div>
 
     <!-- TAB 2: LURE LOCKER -->
     <div id="lureTab" class="tab-content">
-      <h2>🧰 Add Lure to Locker</h2>
       <form id="lureForm">
         <div class="form-group">
-          <label>Lure / Setup Name</label>
-          <input type="text" id="lureName" placeholder="e.g. Kingfisher 3.5 - Spatterback UV" required>
+          <label>Lure Name / Model</label>
+          <input type="text" id="lureName" placeholder="e.g. Kingfisher Lite 3.5" required>
         </div>
-        <div class="form-group">
-          <label>Category / Type</label>
-          <select id="lureType">
-            <option value="Spoon">Spoon</option>
-            <option value="Flasher">Flasher</option>
-            <option value="Plug">Plug</option>
-            <option value="Hootchie">Hootchie</option>
-            <option value="Cutplug / Bait">Cutplug / Bait</option>
-            <option value="Other">Other</option>
-          </select>
+        <div class="grid">
+          <div class="form-group">
+            <label>Category</label>
+            <select id="lureType">
+              <option value="Spoon">Spoon</option>
+              <option value="Flasher + Spoon">Flasher + Spoon</option>
+              <option value="Flasher + Hoochie">Flasher + Hoochie</option>
+              <option value="Plug / Ace Hi">Plug / Ace Hi</option>
+              <option value="Cut-Plug Herring">Cut-Plug Herring</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Pattern / Color</label>
+            <input type="text" id="lureColor" placeholder="e.g. Spatterback UV">
+          </div>
         </div>
-        <button type="submit" class="btn-action btn-submit">➕ Add Lure to Locker</button>
+        <button type="submit" class="btn-submit">+ Add Lure to Locker</button>
       </form>
 
-      <div class="lure-list">
-        <h3>Saved Lures</h3>
-        <div id="lureEntries"></div>
+      <div style="margin-top: 20px;">
+        <h3>Your Lure Inventory</h3>
+        <div id="lureList"></div>
       </div>
     </div>
 
-    <!-- TAB 3: LOGBOOK -->
+    <!-- TAB 3: LOGBOOK & EXPORT/IMPORT -->
     <div id="historyTab" class="tab-content">
-      <h2>📖 Saved Logbook Entries</h2>
-      <button type="button" class="btn-action btn-export" onclick="exportCSV()">📥 Export CSV Backup</button>
-      <div class="log-list">
-        <div id="logEntries"></div>
+      <div id="logEntries"></div>
+      
+      <div style="margin-top: 20px; padding-top: 15px; border-top: 2px solid #e2e8f0;">
+        <h3>Data Management</h3>
+        <button type="button" class="btn-export" onclick="exportCSV()">📥 Export All Data (CSV)</button>
+        
+        <div class="item-card" style="margin-top: 15px; border-left-color: #f59e0b; background: #fffbeb;">
+          <h4 style="margin: 0 0 6px 0; color: #92400e;">📌 Import Google Keep Data</h4>
+          <p style="font-size: 0.8rem; color: #78350f; margin-top: 0; margin-bottom: 10px;">Upload a converted CSV file or paste raw Keep notes directly below.</p>
+          
+          <div class="form-group">
+            <label>Option A: Upload Keep CSV File</label>
+            <input type="file" id="csvFileInput" accept=".csv" onchange="importCSV(event)">
+          </div>
+
+          <div class="form-group" style="margin-top: 12px;">
+            <label>Option B: Paste Raw Keep Text Notes</label>
+            <textarea id="keepTextPaste" rows="3" placeholder="Paste notes here (e.g. 'Coho 60ft wire 110 FOW Kingfisher Spatterback')"></textarea>
+            <button type="button" class="btn-submit" style="background: #d97706; margin-top: 6px;" onclick="importKeepText()">Parse & Import Keep Text</button>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- TAB 4: REPORTS -->
+    <!-- TAB 4: REPORTS & ANALYTICS -->
     <div id="reportsTab" class="tab-content">
-      <h2>📊 Catch Analytics & Reports</h2>
-      <div id="reportsContent"></div>
+      <div id="reportsContainer"></div>
     </div>
-
   </div>
 
   <script>
@@ -326,110 +208,140 @@
       navigator.serviceWorker.register('sw.js').catch(() => {});
     }
 
+    // Default Seed Lures if Database is Empty
     const defaultLures = [
-      { name: "Kingfisher 3.5 - Spatterback UV", type: "Spoon" },
-      { name: "Coho Killer - Herring Aid", type: "Spoon" },
-      { name: "Silver Horde 4.0 - Green Nickel", type: "Plug" },
-      { name: "Ace Hi Fly - Green Spatter", type: "Hootchie" }
+      { id: '1', name: 'Kingfisher 3.5', type: 'Spoon', color: 'Spatterback UV' },
+      { id: '2', name: 'Coho Killer', type: 'Flasher + Spoon', color: 'Cookies & Cream' },
+      { id: '3', name: 'Goldstar Plastic', type: 'Flasher + Hoochie', color: 'Chartreuse Green Zone' }
     ];
 
     function getLures() {
-      const stored = localStorage.getItem('lureLocker');
+      const stored = localStorage.getItem('salmonLures');
       if (!stored) {
-        localStorage.setItem('lureLocker', JSON.stringify(defaultLures));
+        localStorage.setItem('salmonLures', JSON.stringify(defaultLures));
         return defaultLures;
       }
       return JSON.parse(stored);
     }
 
-    function renderLureOptions() {
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      
+      const btn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(tabId));
+      if (btn) btn.classList.add('active');
+
+      if (tabId === 'reportsTab') renderReports();
+    }
+
+    function populateLureDropdown() {
       const lures = getLures();
       const select = document.getElementById('lureSelect');
-      select.innerHTML = lures.map(l => `<option value="${l.name} [${l.type}]">${l.name} [${l.type}]</option>`).join('');
+      select.innerHTML = lures.map(l => `<option value="${l.name} (${l.color})">${l.name} - ${l.color} [${l.type}]</option>`).join('');
     }
 
-    function renderLureList() {
+    function renderLures() {
       const lures = getLures();
-      const container = document.getElementById('lureEntries');
-      if (!lures.length) {
-        container.innerHTML = '<p style="color:#64748b;">No lures in locker yet.</p>';
+      const logs = JSON.parse(localStorage.getItem('salmonLogs') || '[]');
+      const list = document.getElementById('lureList');
+
+      if (lures.length === 0) {
+        list.innerHTML = '<p style="text-align:center; color:#64748b;">No lures in locker.</p>';
         return;
       }
-      container.innerHTML = lures.map((l, index) => `
-        <div class="log-card">
-          <button class="delete-btn" onclick="deleteLure(${index})">✕ Delete</button>
-          <div class="log-title"><span>${l.name}</span></div>
-          <div class="log-meta">Type: ${l.type}</div>
-        </div>
-      `).join('');
-    }
 
-    function deleteLure(index) {
-      const lures = getLures();
-      lures.splice(index, 1);
-      localStorage.setItem('lureLocker', JSON.stringify(lures));
-      renderLureOptions();
-      renderLureList();
+      list.innerHTML = lures.map(l => {
+        const lureLabel = `${l.name} (${l.color})`;
+        
+        const matches = logs.filter(log => 
+          log.lure === lureLabel || (l.name && log.lure && log.lure.includes(l.name))
+        );
+
+        const catchListHtml = matches.length > 0
+          ? matches.map(c => `
+              <li style="margin-bottom: 4px;">
+                <strong>${new Date(c.timestamp).toLocaleDateString()}</strong>: ${c.species} (${c.outcome}) — ${c.marineArea} @ ${c.depth}ft
+              </li>
+            `).join('')
+          : '<li style="color:#94a3b8; list-style:none;">No catches logged yet for this lure.</li>';
+
+        return `
+          <div class="item-card" style="border-left-color: #059669;">
+            <div class="card-title">
+              <span>${l.name}</span>
+              <button class="btn-danger" onclick="deleteLure('${l.id}')">Delete</button>
+            </div>
+            <div class="card-meta">
+              <span class="badge">${l.type}</span> <strong>Color:</strong> ${l.color}
+            </div>
+            <div class="card-meta" style="margin-top: 8px; font-weight: 600; color: #1e3a8a;">
+              🏆 Total Catches: ${matches.length}
+            </div>
+            <details style="margin-top: 6px; font-size: 0.8rem; color: #334155;">
+              <summary style="cursor: pointer; font-weight: 600; color: #2563eb;">View Linked Catches (${matches.length})</summary>
+              <ul style="padding-left: 18px; margin-top: 6px; margin-bottom: 4px;">
+                ${catchListHtml}
+              </ul>
+            </details>
+          </div>
+        `;
+      }).join('');
+
+      populateLureDropdown();
     }
 
     document.getElementById('lureForm').addEventListener('submit', (e) => {
       e.preventDefault();
-      const name = document.getElementById('lureName').value.trim();
-      const type = document.getElementById('lureType').value;
-      if (!name) return;
-
       const lures = getLures();
-      lures.push({ name, type });
-      localStorage.setItem('lureLocker', JSON.stringify(lures));
-      
+      const newLure = {
+        id: Date.now().toString(),
+        name: document.getElementById('lureName').value,
+        type: document.getElementById('lureType').value,
+        color: document.getElementById('lureColor').value
+      };
+      lures.push(newLure);
+      localStorage.setItem('salmonLures', JSON.stringify(lures));
       document.getElementById('lureForm').reset();
-      renderLureOptions();
-      renderLureList();
-      alert('Lure added to locker!');
+      renderLures();
     });
 
-    document.getElementById('timestamp').value = new Date().toISOString().slice(0, 16);
-
-    const catchForm = document.getElementById('catchForm');
-    const logContainer = document.getElementById('logEntries');
+    function deleteLure(id) {
+      let lures = getLures();
+      lures = lures.filter(l => l.id !== id);
+      localStorage.setItem('salmonLures', JSON.stringify(lures));
+      renderLures();
+    }
 
     function renderLogs() {
       const logs = JSON.parse(localStorage.getItem('salmonLogs') || '[]');
-      if (!logs.length) {
-        logContainer.innerHTML = '<p style="color:#64748b; margin-top:12px;">No catch entries recorded yet.</p>';
+      const container = document.getElementById('logEntries');
+      if (logs.length === 0) {
+        container.innerHTML = '<p style="text-align:center; color:#64748b;">No catches recorded yet.</p>';
         return;
       }
-      logContainer.innerHTML = logs.map((item, index) => `
-        <div class="log-card">
-          <button class="delete-btn" onclick="deleteCatch(${index})">✕ Delete</button>
-          <div class="log-title">
+      container.innerHTML = logs.map(item => `
+        <div class="item-card">
+          <div class="card-title">
             <span>${item.species} (${item.outcome})</span>
-            <span>${new Date(item.timestamp).toLocaleDateString()}</span>
+            <span style="font-size:0.75rem; color:#64748b;">${new Date(item.timestamp).toLocaleDateString()}</span>
           </div>
-          <div class="log-meta">
-            ${item.marineArea} | ${item.lure}
+          <div class="card-meta">
+            📍 <strong>${item.marineArea}</strong> | ☁️ ${item.weather}
           </div>
-          <div class="log-meta">
-            Depth: ${item.depth || '--'} ft | FOW: ${item.fow || '--'} ft @ ${item.speed || '--'} kts (${item.weather || 'N/A'})
+          <div class="card-meta">
+            🎣 <strong>Lure:</strong> ${item.lure}
           </div>
-          ${item.size ? `<div class="log-meta"><strong>Size:</strong> ${item.size}</div>` : ''}
+          <div class="card-meta">
+            ⚓ <strong>Depth:</strong> ${item.depth}ft | 🌊 <strong>FOW:</strong> ${item.fow}ft @ ${item.speed}kts
+          </div>
+          ${item.size ? `<div class="card-meta">📏 <strong>Size:</strong> ${item.size}</div>` : ''}
           ${item.notes ? `<div class="notes">"${item.notes}"</div>` : ''}
         </div>
       `).reverse().join('');
     }
 
-    function deleteCatch(reversedIndex) {
-      const logs = JSON.parse(localStorage.getItem('salmonLogs') || '[]');
-      const actualIndex = logs.length - 1 - reversedIndex;
-      logs.splice(actualIndex, 1);
-      localStorage.setItem('salmonLogs', JSON.stringify(logs));
-      renderLogs();
-      if (document.getElementById('reportsTab').classList.contains('active')) {
-        renderReports();
-      }
-    }
-
-    catchForm.addEventListener('submit', (e) => {
+    document.getElementById('catchForm').addEventListener('submit', (e) => {
       e.preventDefault();
       const entry = {
         timestamp: document.getElementById('timestamp').value,
@@ -448,122 +360,242 @@
       const logs = JSON.parse(localStorage.getItem('salmonLogs') || '[]');
       logs.push(entry);
       localStorage.setItem('salmonLogs', JSON.stringify(logs));
-
-      catchForm.reset();
+      document.getElementById('catchForm').reset();
       document.getElementById('timestamp').value = new Date().toISOString().slice(0, 16);
       renderLogs();
-      alert('Catch saved!');
+      switchTab('historyTab');
     });
 
     function exportCSV() {
       const logs = JSON.parse(localStorage.getItem('salmonLogs') || '[]');
       if (!logs.length) return alert('No data to export.');
-
-      const headers = ['Timestamp', 'Marine Area', 'Species', 'Lure', 'Depth (ft)', 'FOW (ft)', 'Speed (kts)', 'Weather', 'Outcome', 'Size', 'Notes'];
+      
+      const headers = ['Timestamp', 'Marine Area', 'Species', 'Linked Lure', 'Downrigger Depth (ft)', 'FOW (ft)', 'Speed (kts)', 'Weather', 'Outcome', 'Size', 'Notes'];
       const rows = logs.map(l => [
         l.timestamp,
-        l.marineArea,
-        l.species,
-        `"${l.lure || ''}"`,
+        `"${l.marineArea}"`,
+        `"${l.species}"`,
+        `"${l.lure}"`,
         l.depth,
         l.fow,
         l.speed,
-        l.weather,
-        l.outcome,
-        `"${l.size || ''}"`,
-        `"${l.notes || ''}"`
+        `"${l.weather}"`,
+        `"${l.outcome}"`,
+        `"${l.size}"`,
+        `"${l.notes}"`
       ]);
-
       const csv = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+      
       const link = document.createElement('a');
       link.href = encodeURI(csv);
-      link.download = `salmon_log_${new Date().toISOString().slice(0, 10)}.csv`;
+      link.download = `salmon_log_${new Date().toISOString().slice(0,10)}.csv`;
       link.click();
     }
 
-    function switchTab(tabId) {
-      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    function importCSV(event) {
+      const file = event.target.files[0];
+      if (!file) return;
 
-      const targetTab = document.getElementById(tabId);
-      if (targetTab) targetTab.classList.add('active');
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const text = e.target.result;
+        const lines = text.split('\n');
+        const logs = JSON.parse(localStorage.getItem('salmonLogs') || '[]');
+        
+        let startIndex = lines[0].toLowerCase().includes('timestamp') ? 1 : 0;
 
-      const buttons = document.querySelectorAll('.tab-btn');
-      buttons.forEach(btn => {
-        if (btn.getAttribute('onclick').includes(tabId)) {
-          btn.classList.add('active');
+        for (let i = startIndex; i < lines.length; i++) {
+          if (!lines[i].trim()) continue;
+          
+          const cols = lines[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || lines[i].split(',');
+          const clean = cols.map(c => c ? c.replace(/^"|"$/g, '').trim() : '');
+
+          if (clean.length >= 5) {
+            logs.push({
+              timestamp: clean[0] || new Date().toISOString().slice(0, 16),
+              marineArea: clean[1] || 'Other',
+              species: clean[2] || 'Chinook (King)',
+              lure: clean[3] || 'Unknown Lure',
+              depth: clean[4] || '0',
+              fow: clean[5] || '0',
+              speed: clean[6] || '0',
+              weather: clean[7] || 'Overcast',
+              outcome: clean[8] || 'Kept',
+              size: clean[9] || '',
+              notes: clean[10] || ''
+            });
+          }
         }
+
+        localStorage.setItem('salmonLogs', JSON.stringify(logs));
+        renderLogs();
+        alert('Successfully imported entries into your log!');
+      };
+      reader.readAsText(file);
+    }
+
+    function importKeepText() {
+      const rawText = document.getElementById('keepTextPaste').value.trim();
+      if (!rawText) return alert('Please paste some text notes first.');
+
+      const lines = rawText.split('\n');
+      const logs = JSON.parse(localStorage.getItem('salmonLogs') || '[]');
+      let count = 0;
+
+      lines.forEach(line => {
+        if (!line.trim()) return;
+        
+        const entry = {
+          timestamp: new Date().toISOString().slice(0, 16),
+          marineArea: 'Other',
+          species: 'Chinook (King)',
+          lure: 'Keep Import',
+          depth: '0',
+          fow: '0',
+          speed: '2.4',
+          weather: 'Overcast',
+          outcome: 'Kept',
+          size: '',
+          notes: line.trim()
+        };
+
+        const lower = line.toLowerCase();
+        if (lower.includes('coho') || lower.includes('silver')) entry.species = 'Coho (Silver)';
+        if (lower.includes('pink')) entry.species = 'Pink';
+        if (lower.includes('chum')) entry.species = 'Chum';
+        if (lower.includes('released')) entry.outcome = 'Released';
+        if (lower.includes('lost') || lower.includes('strike')) entry.outcome = 'Lost / Strike';
+
+        const depthMatch = line.match(/(\d+)\s*(?:ft|')?\s*(?:wire|depth|downrigger)/i);
+        if (depthMatch) entry.depth = depthMatch[1];
+
+        const fowMatch = line.match(/(\d+)\s*(?:ft|')?\s*(?:fow|water)/i);
+        if (fowMatch) entry.fow = fowMatch[1];
+
+        logs.push(entry);
+        count++;
       });
 
-      if (tabId === 'reportsTab') {
-        renderReports();
-      }
+      localStorage.setItem('salmonLogs', JSON.stringify(logs));
+      document.getElementById('keepTextPaste').value = '';
+      renderLogs();
+      alert(`Imported ${count} entry/entries from Keep notes!`);
     }
 
     function renderReports() {
       const logs = JSON.parse(localStorage.getItem('salmonLogs') || '[]');
-      const container = document.getElementById('reportsContent');
+      const container = document.getElementById('reportsContainer');
 
-      if (!logs.length) {
-        container.innerHTML = '<p style="color:#64748b; margin-top:12px;">No catch records found. Log a catch to populate analytics!</p>';
+      if (logs.length === 0) {
+        container.innerHTML = '<p style="text-align:center; color:#64748b; padding:20px;">Log some catches to see reports & analytics here.</p>';
         return;
       }
 
-      const total = logs.length;
-      const kept = logs.filter(l => l.outcome === 'Kept').length;
-      const released = logs.filter(l => l.outcome === 'Released').length;
-      const lost = logs.filter(l => l.outcome === 'Lost / Strike').length;
+      const totalCatches = logs.length;
 
+      // 1. Top Lures
       const lureCounts = {};
-      logs.forEach(l => {
-        if (l.lure) lureCounts[l.lure] = (lureCounts[l.lure] || 0) + 1;
-      });
+      logs.forEach(l => { lureCounts[l.lure] = (lureCounts[l.lure] || 0) + 1; });
       const sortedLures = Object.entries(lureCounts).sort((a, b) => b[1] - a[1]);
 
-      const maCounts = {};
+      // 2. Best Time of Day
+      const timeBuckets = {
+        'Early Morning (5am-9am)': 0,
+        'Mid Morning (9am-12pm)': 0,
+        'Afternoon (12pm-5pm)': 0,
+        'Evening (5pm-9pm)': 0,
+        'Night (9pm-5am)': 0
+      };
+
       logs.forEach(l => {
-        if (l.marineArea) maCounts[l.marineArea] = (maCounts[l.marineArea] || 0) + 1;
+        if (!l.timestamp) return;
+        const hour = new Date(l.timestamp).getHours();
+        if (hour >= 5 && hour < 9) timeBuckets['Early Morning (5am-9am)']++;
+        else if (hour >= 9 && hour < 12) timeBuckets['Mid Morning (9am-12pm)']++;
+        else if (hour >= 12 && hour < 17) timeBuckets['Afternoon (12pm-5pm)']++;
+        else if (hour >= 17 && hour < 21) timeBuckets['Evening (5pm-9pm)']++;
+        else timeBuckets['Night (9pm-5am)']++;
       });
-      const sortedMA = Object.entries(maCounts).sort((a, b) => b[1] - a[1]);
+
+      const get5ftLabel = (val) => {
+        const start = Math.floor(val / 5) * 5;
+        return `${start} - ${start + 4} ft`;
+      };
+
+      // 3. Top Wire Success
+      const wireCounts = {};
+      logs.forEach(l => {
+        if (!l.depth) return;
+        const d = parseFloat(l.depth);
+        if (!isNaN(d)) {
+          const label = get5ftLabel(d);
+          wireCounts[label] = (wireCounts[label] || 0) + 1;
+        }
+      });
+      const sortedWire = Object.entries(wireCounts).sort((a, b) => b[1] - a[1]);
+
+      // 4. Top FOW Success
+      const fowCounts = {};
+      logs.forEach(l => {
+        if (!l.fow) return;
+        const f = parseFloat(l.fow);
+        if (!isNaN(f)) {
+          const label = get5ftLabel(f);
+          fowCounts[label] = (fowCounts[label] || 0) + 1;
+        }
+      });
+      const sortedFow = Object.entries(fowCounts).sort((a, b) => b[1] - a[1]);
+
+      const renderBar = (label, count) => {
+        const pct = Math.round((count / totalCatches) * 100);
+        return `
+          <div style="margin-bottom: 8px;">
+            <div style="display:flex; justify-content:space-between; font-size:0.82rem; font-weight:600;">
+              <span>${label}</span>
+              <span>${count} (${pct}%)</span>
+            </div>
+            <div style="background:#e2e8f0; height:8px; border-radius:4px; margin-top:3px; overflow:hidden;">
+              <div style="background:#2563eb; width:${pct}%; height:100%; border-radius:4px;"></div>
+            </div>
+          </div>
+        `;
+      };
 
       container.innerHTML = `
-        <div class="stats-grid">
-          <div class="stat-box">
-            <div class="stat-number">${total}</div>
-            <div class="stat-label">Total Hookups</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-number">${kept}</div>
-            <div class="stat-label">Kept</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-number">${released}</div>
-            <div class="stat-label">Released</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-number">${lost}</div>
-            <div class="stat-label">Lost / Strike</div>
-          </div>
+        <div class="item-card" style="background:#eff6ff; border-left-color:#1e3a8a; text-align:center;">
+          <h2 style="margin:0; font-size:1.5rem; color:#1e3a8a;">${totalCatches}</h2>
+          <div style="font-size:0.8rem; font-weight:600; color:#475569;">TOTAL RECORDED FISH / STRIKES</div>
         </div>
 
-        <h3 style="color: var(--primary); margin-top: 16px;">Top Performing Lures</h3>
-        ${sortedLures.map(([lure, count]) => `
-          <div class="stat-card">
-            <div class="log-title"><span>${lure}</span> <span>${count} catch${count > 1 ? 'es' : ''}</span></div>
-          </div>
-        `).join('')}
+        <div class="item-card" style="border-left-color:#059669;">
+          <h3 style="margin-top:0; color:#1e3a8a; font-size:0.95rem;">🎣 Top Lures & Rigs</h3>
+          ${sortedLures.slice(0, 5).map(([lure, cnt]) => renderBar(lure, cnt)).join('')}
+        </div>
 
-        <h3 style="color: var(--primary); margin-top: 16px;">Catches by Marine Area</h3>
-        ${sortedMA.map(([ma, count]) => `
-          <div class="stat-card">
-            <div class="log-title"><span>${ma}</span> <span>${count} catch${count > 1 ? 'es' : ''}</span></div>
-          </div>
-        `).join('')}
+        <div class="item-card" style="border-left-color:#d97706;">
+          <h3 style="margin-top:0; color:#1e3a8a; font-size:0.95rem;">⏰ Best Time of Day</h3>
+          ${Object.entries(timeBuckets).map(([bucket, cnt]) => renderBar(bucket, cnt)).join('')}
+        </div>
+
+        <div class="item-card" style="border-left-color:#0284c7;">
+          <h3 style="margin-top:0; color:#1e3a8a; font-size:0.95rem;">⚓ Top Wire Success (5 ft Increments)</h3>
+          ${sortedWire.length > 0 
+            ? sortedWire.slice(0, 5).map(([bracket, cnt]) => renderBar(bracket, cnt)).join('')
+            : '<p style="font-size:0.82rem; color:#64748b; margin:0;">No depth data logged yet.</p>'}
+        </div>
+
+        <div class="item-card" style="border-left-color:#a855f7;">
+          <h3 style="margin-top:0; color:#1e3a8a; font-size:0.95rem;">🌊 Top FOW Success (5 ft Increments)</h3>
+          ${sortedFow.length > 0 
+            ? sortedFow.slice(0, 5).map(([bracket, cnt]) => renderBar(bracket, cnt)).join('')
+            : '<p style="font-size:0.82rem; color:#64748b; margin:0;">No FOW data logged yet.</p>'}
+        </div>
       `;
     }
 
-    renderLureOptions();
-    renderLureList();
+    // Initial Load
+    document.getElementById('timestamp').value = new Date().toISOString().slice(0, 16);
+    renderLures();
     renderLogs();
   </script>
 </body>
