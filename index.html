@@ -215,17 +215,54 @@
 
     function renderLures() {
       const lures = getLures();
+      const logs = JSON.parse(localStorage.getItem('salmonLogs') || '[]');
       const list = document.getElementById('lureList');
-      list.innerHTML = lures.map(l => `
-        <div class="item-card">
-          <div class="card-title">
-            <span>${l.name}</span>
-            <button class="btn-danger" onclick="deleteLure('${l.id}')">Delete</button>
+
+      if (lures.length === 0) {
+        list.innerHTML = '<p style="text-align:center; color:#64748b;">No lures in locker.</p>';
+        return;
+      }
+
+      list.innerHTML = lures.map(l => {
+        const lureLabel = `${l.name} (${l.color})`;
+        
+        // Find all catches linked to this specific lure
+        const matches = logs.filter(log => 
+          log.lure === lureLabel || (l.name && log.lure && log.lure.includes(l.name))
+        );
+
+        const catchListHtml = matches.length > 0
+          ? matches.map(c => `
+              <li style="margin-bottom: 4px;">
+                <strong>${new Date(c.timestamp).toLocaleDateString()}</strong>: ${c.species} (${c.outcome}) — ${c.marineArea} @ ${c.depth}ft
+              </li>
+            `).join('')
+          : '<li style="color:#94a3b8; list-style:none;">No catches logged yet for this lure.</li>';
+
+        return `
+          <div class="item-card" style="border-left-color: #059669;">
+            <div class="card-title">
+              <span>${l.name}</span>
+              <button class="btn-danger" onclick="deleteLure('${l.id}')">Delete</button>
+            </div>
+            <div class="card-meta">
+              <span class="badge">${l.type}</span> <strong>Color:</strong> ${l.color}
+            </div>
+            <div class="card-meta" style="margin-top: 8px; font-weight: 600; color: #1e3a8a;">
+              🏆 Total Catches: ${matches.length}
+            </div>
+            <details style="margin-top: 6px; font-size: 0.8rem; color: #334155;">
+              <summary style="cursor: pointer; font-weight: 600; color: #2563eb;">View Linked Catches (${matches.length})</summary>
+              <ul style="padding-left: 18px; margin-top: 6px; margin-bottom: 4px;">
+                ${catchListHtml}
+              </ul>
+            </details>
           </div>
-          <div class="card-meta"><span class="badge">${l.type}</span> ${l.color}</div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
+
       populateLureDropdown();
+    
     }
 
     document.getElementById('lureForm').addEventListener('submit', (e) => {
